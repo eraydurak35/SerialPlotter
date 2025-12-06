@@ -2,6 +2,7 @@
 #define PLOTTERWINDOW_H
 
 #include "qcustomplot/qcustomplot.h"
+#include "datapacket.h"
 #include <QWidget>
 
 namespace Ui {
@@ -30,8 +31,8 @@ private:
 
     QMap<int, QCPGraph*> graphMap;
     int max_channel_count = 0;
-    double xRange = 5.0;  // 5 saniyelik kaydırma
-    double yRange = 1.0;
+    double xRange = 5.0;
+    double yRange = 3.0;
     double yOffset = 0.0;
 
     QMap<int, QCheckBox*> channelCheckboxes;
@@ -39,7 +40,7 @@ private:
     QMap<int, QColor> channelColors;
 
 public slots:
-    void onNewData(int channel, qint64 timestamp, double value);
+    void onNewData(DataPacket packet);
 
 signals:
 

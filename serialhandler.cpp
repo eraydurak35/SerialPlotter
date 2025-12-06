@@ -13,7 +13,7 @@ SerialHandler::SerialHandler(QObject *parent)
     freqs[1] = 120;
     freqs[2] = 230;
     freqs[3] = 340;
-    freqs[4] = 450;
+    freqs[4] = 990;
 
     startTime = QDateTime::currentMSecsSinceEpoch();
 
@@ -24,15 +24,20 @@ SerialHandler::SerialHandler(QObject *parent)
 void SerialHandler::generateFakeData() {
 
     static qint64 timestamp_ms = 0;
-    timestamp_ms++;
+    timestamp_ms = timestamp_ms + 1;
     double timeSec = timestamp_ms / 1000.0; // doğru zaman
 
-    for (int ch = 0; ch < 5; ch++)
-    {
+    DataPacket packet;
+    packet.timestamp = timestamp_ms;
+    packet.values.resize(5);
+
+    for (int ch = 0; ch < 5; ch++) {
         double value = sin(2.0 * M_PI * freqs[ch] * timeSec + phase[ch]);
         value += 2.0;
 
-        emit newData(ch, timestamp_ms, value);
+        packet.values[ch] = value;
     }
+
+    emit newDataPacket(packet);
 
 }

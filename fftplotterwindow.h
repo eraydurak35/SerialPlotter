@@ -4,6 +4,7 @@
 #include "qcustomplot/qcustomplot.h"
 #include <QWidget>
 #include "fftworkermulti.h"
+#include "datapacket.h"
 
 namespace Ui {
 class FFTPlotterWindow;
@@ -43,14 +44,17 @@ private:
 
     QSet<int> selectedChannels;    // FFT penceresinde aktif sinyaller
 
+    QMap<int, QCPItemTracer*> peakMarker;
+    QMap<int, QCPItemText*>   peakLabel;
+
 public slots:
-    void onNewData(int channel, qint64 timestamp, double value);
+    void onNewData(DataPacket packet);
 
     void onFftReadyMulti(const QMap<int, QVector<double>> &freqs,
                          const QMap<int, QVector<double>> &mags);
 
 signals:
-    void addNewFFTData(int channel, qint64 timestamp, double value);
+    void addNewFFTData(DataPacket packet);
     void graphClosed(FFTPlotterWindow* self);
     void enableFFTChannel(int ch);
     void disableFFTChannel(int ch);

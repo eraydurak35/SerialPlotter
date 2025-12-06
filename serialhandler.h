@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QTimer>
+#include "datapacket.h"
 
 class SerialHandler : public QObject
 {
@@ -18,7 +19,7 @@ private:
     double freqs[5];
 
 signals:
-    void newData(int channel, qint64 timestamp, double value);
+    void newDataPacket(const DataPacket &packet);
 
 private slots:
     void generateFakeData();

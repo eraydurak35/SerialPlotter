@@ -1,4 +1,5 @@
 #include "fftworkermulti.h"
+#include "qdebug.h"
 
 FFTWorkerMulti::FFTWorkerMulti(QObject *parent)
     : QObject(parent) {
@@ -24,18 +25,40 @@ void FFTWorkerMulti::disableChannel(int ch) {
     activeChannels.remove(ch);
 }
 
-void FFTWorkerMulti::addSample(int channel, qint64 timestamp, double value) {
-    if (!activeChannels.contains(channel))
-        return;
+void FFTWorkerMulti::addSample(DataPacket packet) {
 
-    auto &buf = channelBuffers[channel];
-    buf.append(value);
+    for (int i = 0; i < packet.values.size(); i++) {
 
-    if (buf.size() >= windowSize)
-    {
-        computeFFT(channel);
-        buf.clear();
+        if (!activeChannels.contains(i))
+            return;
+
+        auto &buf = channelBuffers[i];
+        static qint64 buff_start_timestamp = 0;
+
+        if (i == 0 && buf.size() == 0) {
+            buff_start_timestamp = packet.timestamp;
+        }
+
+        buf.append(packet.values[i]);
+
+        if (buf.size() >= windowSize) {
+
+            // Sadece 0. sinyal üzerinden sample rate hesapla
+            if (i == 0) {
+                double time_difference = static_cast<double>(packet.timestamp) - static_cast<double>(buff_start_timestamp);
+                if (time_difference > 0) {
+                    sampleRate = (windowSize / time_difference) * 1000.0;
+                } else {
+                    qDebug() << "Why the hell time difference is not bigger than zero";
+                }
+
+                buff_start_timestamp = packet.timestamp;
+            }
+            computeFFT(i);
+            buf.clear();
+        }
     }
+
 }
 
 void FFTWorkerMulti::computeFFT(int channel) {

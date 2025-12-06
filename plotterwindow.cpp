@@ -51,30 +51,31 @@ void PlotterWindow::closeEvent(QCloseEvent *event) {
     QWidget::closeEvent(event);
 }
 
-void PlotterWindow::onNewData(int channel, qint64 timestamp, double value) {
+void PlotterWindow::onNewData(DataPacket packet) {
 
-    // Gerekiyorsa yeni kanal ekle
-    if ((channel + 1) > max_channel_count) {
-        createSignalSelector(channel + 1);
-        max_channel_count = channel + 1;
+    for (int i = 0; i < packet.values.size(); i++) {
+
+        if ((i + 1) > max_channel_count) {
+            createSignalSelector(i + 1);
+            max_channel_count = i + 1;
+        }
+
+        // Kanal yoksa (seçilmemişse) çık
+        if (graphMap.contains(i)) {
+            double tSec = packet.timestamp / 1000.0;
+
+            QCPGraph *g = graphMap[i];
+
+            // --- QCustomPlot'ta veri ekleme ---
+            g->addData(tSec, packet.values[i]);
+
+            // --- Kaydırmalı X ekseni ---
+            ui->plot->xAxis->setRange(tSec - xRange, tSec);
+
+            // --- Yeniden çizim ---
+            ui->plot->replot(QCustomPlot::rpQueuedReplot);
+        }
     }
-
-    // Kanal yoksa (seçilmemişse) çık
-    if (!graphMap.contains(channel))
-        return;
-
-    double tSec = timestamp / 1000.0;
-
-    QCPGraph *g = graphMap[channel];
-
-    // --- QCustomPlot'ta veri ekleme ---
-    g->addData(tSec, value);
-
-    // --- Kaydırmalı X ekseni ---
-    ui->plot->xAxis->setRange(tSec - xRange, tSec);
-
-    // --- Yeniden çizim ---
-    ui->plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
 void PlotterWindow::addChannel(int channel) {
@@ -100,8 +101,8 @@ void PlotterWindow::createSignalSelector(int count) {
 
     const int cols = 10;
 
-    for (int ch = 0; ch < count; ++ch)
-    {
+    for (int ch = 0; ch < count; ++ch) {
+
         QCheckBox *chk = new QCheckBox(QString("Ch %1").arg(ch));
 
         QFrame *colorBox = new QFrame();
@@ -137,7 +138,6 @@ void PlotterWindow::createSignalSelector(int count) {
 void PlotterWindow::removeChannel(int channel) {
     if (!graphMap.contains(channel))
         return;
-
     ui->plot->removeGraph(graphMap[channel]);
     graphMap.remove(channel);
 }

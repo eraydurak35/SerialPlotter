@@ -1,12 +1,5 @@
 #include "fftplotterwindow.h"
 #include "ui_fftplotterwindow.h"
-
-
-
-
-#include "fftplotterwindow.h"
-#include "ui_fftplotterwindow.h"
-
 #include <QThread>
 #include <QCheckBox>
 #include <QFrame>
@@ -16,8 +9,8 @@
 
 FFTPlotterWindow::FFTPlotterWindow(QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::FFTPlotterWindow)
-{
+    , ui(new Ui::FFTPlotterWindow) {
+
     ui->setupUi(this);
     ui->tabWidget->setCurrentIndex(0);
 
@@ -91,8 +84,7 @@ FFTPlotterWindow::FFTPlotterWindow(QWidget *parent)
     fftworkerthread->start();
 }
 
-FFTPlotterWindow::~FFTPlotterWindow()
-{
+FFTPlotterWindow::~FFTPlotterWindow() {
     // Worker'a dur sinyali
     emit stopWorker();
 
@@ -105,8 +97,7 @@ FFTPlotterWindow::~FFTPlotterWindow()
     delete ui;
 }
 
-void FFTPlotterWindow::closeEvent(QCloseEvent *event)
-{
+void FFTPlotterWindow::closeEvent(QCloseEvent *event) {
     emit graphClosed(this);
     QWidget::closeEvent(event);
 }
@@ -115,23 +106,23 @@ void FFTPlotterWindow::closeEvent(QCloseEvent *event)
 //  SERIAL / PLOTTER TARAFINDAN ÇAĞRILAN SLOT
 //  Ham zaman-domain veriyi direkt FFT worker'a forward ediyoruz
 // ----------------------------------------------------------------------
-void FFTPlotterWindow::onNewData(int channel, qint64 timestamp, double value)
-{
+void FFTPlotterWindow::onNewData(DataPacket packet) {
 
     // Gerekiyorsa yeni kanal ekle
-    if ((channel + 1) > max_channel_count) {
-        createSignalSelector(channel + 1);
-        max_channel_count = channel + 1;
+    for (int i = 0; i < packet.values.size(); i++) {
+        if ((i + 1) > max_channel_count) {
+            createSignalSelector(i + 1);
+            max_channel_count = i + 1;
+        }
     }
 
-    emit addNewFFTData(channel, timestamp, value);
+    emit addNewFFTData(packet);
 }
 
 // ----------------------------------------------------------------------
 //  FFT PENCERESİNDE GÖSTERİLECEK KANALA GRAFİK EKLE
 // ----------------------------------------------------------------------
-void FFTPlotterWindow::addChannel(int channel)
-{
+void FFTPlotterWindow::addChannel(int channel) {
     if (graphMap.contains(channel))
         return;
 
@@ -151,8 +142,7 @@ void FFTPlotterWindow::addChannel(int channel)
 // ----------------------------------------------------------------------
 //  SİNYAL SEÇME PANELİ (CHECKBOX + RENK KUTUSU)
 // ----------------------------------------------------------------------
-void FFTPlotterWindow::createSignalSelector(int count)
-{
+void FFTPlotterWindow::createSignalSelector(int count) {
     channelCheckboxes.clear();
 
     const int cols = 10;
@@ -199,27 +189,42 @@ void FFTPlotterWindow::createSignalSelector(int count)
 // ----------------------------------------------------------------------
 //  GRAFİKTEN KANALI KALDIR
 // ----------------------------------------------------------------------
-void FFTPlotterWindow::removeChannel(int channel)
-{
-    if (!graphMap.contains(channel))
-        return;
+void FFTPlotterWindow::removeChannel(int channel) {
 
-    ui->plot->removeGraph(graphMap[channel]);
-    graphMap.remove(channel);
+    if (graphMap.contains(channel)) {
+        ui->plot->removeGraph(graphMap[channel]);
+        graphMap.remove(channel);
+    }
+
+    // --- PEAK TRACER ---
+    if (peakMarker.contains(channel))
+    {
+        // ui->plot->removeItem(peakMarker[channel]); // ÖNEMLİ!
+        delete peakMarker[channel];
+        peakMarker.remove(channel);
+    }
+
+    // --- PEAK LABEL ---
+    if (peakLabel.contains(channel))
+    {
+        // ui->plot->removeItem(peakLabel[channel]); // ÖNEMLİ!
+        delete peakLabel[channel];
+        peakLabel.remove(channel);
+    }
+
+    ui->plot->replot(QCustomPlot::rpQueuedReplot);
 }
 
 // ----------------------------------------------------------------------
 //  WORKER'DAN GELEN ÇOKLU FFT SONUCUNU ÇİZ
 // ----------------------------------------------------------------------
 void FFTPlotterWindow::onFftReadyMulti(const QMap<int, QVector<double>> &freqs,
-                                       const QMap<int, QVector<double>> &mags)
-{
+                                       const QMap<int, QVector<double>> &mags) {
     if (freqs.isEmpty())
         return;
 
     // Seçili her kanal için FFT'yi güncelle
-    for (int ch : std::as_const(selectedChannels))
-    {
+    for (int ch : std::as_const(selectedChannels)) {
         if (!freqs.contains(ch))
             continue;
 
@@ -250,10 +255,8 @@ void FFTPlotterWindow::onFftReadyMulti(const QMap<int, QVector<double>> &freqs,
         int peakIndex = 0;
         double peakMag = -1e9;
 
-        for (int i = 0; i < my.size(); i++)
-        {
-            if (my[i] > peakMag)
-            {
+        for (int i = 0; i < my.size(); i++) {
+            if (my[i] > peakMag) {
                 peakMag = my[i];
                 peakIndex = i;
             }
@@ -261,8 +264,40 @@ void FFTPlotterWindow::onFftReadyMulti(const QMap<int, QVector<double>> &freqs,
 
         double peakFreq = fx[peakIndex];
 
-        graphMap[ch]->setName(QString("Peak: %2 Hz")
-                                  .arg(peakFreq, 0, 'f', 1)); // 1 ondalıklı gösterim
+        graphMap[ch]->setName(QString("Peak: %2 Hz").arg(peakFreq, 0, 'f', 1));
+
+
+        // ---------------------------
+        // PEAK MARKER OLUŞTUR / GÜNCELLE
+        // ---------------------------
+        if (!peakMarker.contains(ch)) {
+            // Tracer (nokta)
+            QCPItemTracer *tr = new QCPItemTracer(ui->plot);
+            tr->setGraph(graphMap[ch]);              // hangi grafiğe bağlı
+            tr->setInterpolating(true);
+            tr->setStyle(QCPItemTracer::tsCircle);
+            tr->setPen(QPen(channelColors[ch], 2));
+            tr->setBrush(QBrush(Qt::white));
+            tr->setSize(6);
+
+            peakMarker[ch] = tr;
+
+            // Text etiketi
+            QCPItemText *txt = new QCPItemText(ui->plot);
+            txt->setColor(Qt::white);
+            txt->setPositionAlignment(Qt::AlignLeft | Qt::AlignBottom);
+            txt->position->setType(QCPItemPosition::ptPlotCoords);
+
+            peakLabel[ch] = txt;
+        }
+
+        // Tracer: sadece X (key) veriyoruz, Y’i grafikten alıyor
+        peakMarker[ch]->setGraph(graphMap[ch]);   // emin olmak için
+        peakMarker[ch]->setGraphKey(peakFreq);
+
+        // Etiket: Plot koordinatları ile direkt konum veriyoruz
+        peakLabel[ch]->position->setCoords(peakFreq, peakMag);
+        peakLabel[ch]->setText(QString("%1 Hz").arg(peakFreq, 0, 'f', 1));
     }
 
     // X ekseni: ilk kanalın frekans aralığına göre ayarla
@@ -275,191 +310,4 @@ void FFTPlotterWindow::onFftReadyMulti(const QMap<int, QVector<double>> &freqs,
     ui->plot->yAxis->setRange(-120, 0);
     ui->plot->replot(QCustomPlot::rpQueuedReplot);
 
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// FFTPlotterWindow::FFTPlotterWindow(QWidget *parent)
-//     : QWidget(parent)
-//     , ui(new Ui::FFTPlotterWindow) {
-//     ui->setupUi(this);
-//     ui->tabWidget->setCurrentIndex(0);
-
-//     QList<QColor> palette = {
-//         QColor(0xff0000), // 0 - kırmızı
-//         QColor(0x00ff00), // 1 - yeşil
-//         QColor(0x0000ff), // 2 - mavi
-//         QColor(0xffff00), // 3 - sarı
-//         QColor(0xff00ff), // 4 - magenta
-//         QColor(0x00ffff), // 5 - cyan
-//         QColor(0xffaa00),
-//         QColor(0x00ffaa),
-//         QColor(0xaa00ff),
-//         QColor(0xffffff)
-//     };
-
-//     for (int i = 0; i < palette.size(); i++)
-//         channelColors[i] = palette[i];
-
-
-//     ui->plot->yAxis->setRange(-yRange, yRange);
-
-//     ui->plot->setBackground(QColor(0x121212));
-//     ui->plot->axisRect()->setBackground(QColor(0x1E1E1E));
-
-//     ui->plot->xAxis->setBasePen(QPen(QColor(0xBBBBBB)));
-//     ui->plot->yAxis->setBasePen(QPen(QColor(0xBBBBBB)));
-
-//     ui->plot->xAxis->setTickPen(QPen(QColor(0xBBBBBB)));
-//     ui->plot->yAxis->setTickPen(QPen(QColor(0xBBBBBB)));
-
-//     ui->plot->xAxis->setTickLabelColor(QColor(0xFFFFFF));
-//     ui->plot->yAxis->setTickLabelColor(QColor(0xFFFFFF));
-
-//     fftworkerthread = new QThread();
-//     fftworker = new FFTWorkerMulti();
-
-//     connect(FFTPlotterWindow::addNewFFTData, );
-
-//     fftworker->moveToThread(fftworkerthread);
-//     fftworkerthread->start();
-
-// }
-
-// FFTPlotterWindow::~FFTPlotterWindow() {
-//     delete ui;
-// }
-
-// void FFTPlotterWindow::closeEvent(QCloseEvent *event) {
-
-//     emit graphClosed(this);
-//     QWidget::closeEvent(event);
-// }
-
-
-// void FFTPlotterWindow::onNewData(int channel, qint64 timestamp, double value) {
-
-//     emit addNewFFTData(channel, timestamp, value);
-// }
-
-// void FFTPlotterWindow::addChannel(int channel) {
-//     if (graphMap.contains(channel))
-//         return;
-
-//     QCPGraph *g = ui->plot->addGraph();
-//     // Rengi ata
-//     QColor c = channelColors.contains(channel)
-//                    ? channelColors[channel]
-//                    : QColor::fromHsv((channel * 36) % 360, 255, 255);  // fallback
-
-//     g->setPen(QPen(c, 1));
-
-//     g->setName(QString("Ch %1").arg(channel));
-
-//     graphMap[channel] = g;
-// }
-
-// void FFTPlotterWindow::createSignalSelector(int count) {
-
-//     channelCheckboxes.clear();
-
-//     const int cols = 10;
-
-//     for (int ch = 0; ch < count; ++ch)
-//     {
-//         QCheckBox *chk = new QCheckBox(QString("Ch %1").arg(ch));
-
-//         QFrame *colorBox = new QFrame();
-//         colorBox->setFixedSize(14, 14);
-//         colorBox->setFrameStyle(QFrame::Box | QFrame::Plain);
-
-//         QColor c = channelColors[ch];
-//         colorBox->setStyleSheet(QString("background-color: %1;").arg(c.name()));
-
-//         // Checkbox + renk kutusu için minik yatay layout
-//         QWidget *container = new QWidget();
-//         QHBoxLayout *h = new QHBoxLayout(container);
-//         h->setContentsMargins(0,0,0,0);
-//         h->setSpacing(4);
-
-//         h->addWidget(colorBox);
-//         h->addWidget(chk);
-
-//         int row = ch / cols;
-//         int col = ch % cols;
-
-//         ui->signals_tab_grid_layout->addWidget(container, row, col);
-
-//         connect(chk, &QCheckBox::toggled, this, [=](bool on){
-//             if (on) {
-//                 addChannel(ch);
-//                 selectedChannels.insert(ch);
-//                 emit enableFFTChannel(ch);   // Worker’a bildir
-//             } else {
-//                 removeChannel(ch);
-//                 selectedChannels.remove(ch);
-//                 emit disableFFTChannel(ch);  // Worker’a bildir
-//             }
-//         });
-
-//         channelCheckboxes[ch] = chk;
-//     }
-// }
-
-// void FFTPlotterWindow::removeChannel(int channel) {
-//     if (!graphMap.contains(channel))
-//         return;
-
-//     ui->plot->removeGraph(graphMap[channel]);
-//     graphMap.remove(channel);
-// }
-
-
-// void FFTPlotterWindow::onFftReadyMulti(const QMap<int, QVector<double>> &freqs,
-//                                const QMap<int, QVector<double>> &mags)
-// {
-//     for (int ch : std::as_const(selectedChannels))
-//     {
-//         if (!graphMap.contains(ch))
-//         {
-//             QCPGraph *g = ui->plot->addGraph();
-//             g->setPen(QPen(channelColors[ch], 2));
-//             g->setAntialiased(false);
-//             graphMap[ch] = g;
-//         }
-
-//         graphMap[ch]->setData(freqs[ch], mags[ch]);
-//     }
-
-//     if (freqs.isEmpty())
-//         return;
-
-//     auto firstCh = freqs.firstKey();
-//     if (freqs[firstCh].isEmpty())
-//         return;
-
-//     ui->plot->xAxis->setRange(0, freqs[firstCh].constLast());
-//     ui->plot->yAxis->setRange(-120, 0);
-//     ui->plot->replot(QCustomPlot::rpQueuedReplot);
-// }

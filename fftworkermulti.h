@@ -5,6 +5,7 @@
 #include <QObject>
 #include <QMap>
 #include <QSet>
+#include "datapacket.h"
 
 class FFTWorkerMulti : public QObject
 {
@@ -15,7 +16,7 @@ public:
     ~FFTWorkerMulti();
 
 public slots:
-    void addSample(int channel, qint64 timestamp, double value);
+    void addSample(DataPacket packet);
     void enableChannel(int ch);
     void disableChannel(int ch);
     void stop();

@@ -55,7 +55,7 @@ void MainWindow::on_addGraphButton_clicked() {
     gw->setGraphIndex(plotList.size());
 
     connect(gw, &PlotterWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
-    connect(serialHandler, &SerialHandler::newData, gw, &PlotterWindow::onNewData);
+    connect(serialHandler, &SerialHandler::newDataPacket, gw, &PlotterWindow::onNewData);
     gw->show();
 
 }
@@ -95,7 +95,18 @@ void MainWindow::on_addFFTGraph_clicked() {
     gw->setGraphIndex(fftList.size());
 
     connect(gw, &FFTPlotterWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
-    connect(serialHandler, &SerialHandler::newData, gw, &FFTPlotterWindow::onNewData);
+    connect(serialHandler, &SerialHandler::newDataPacket, gw, &FFTPlotterWindow::onNewData);
     gw->show();
+}
+
+
+void MainWindow::on_showTableView_clicked() {
+
+    tableWindow = new DataTableWindow();
+    tableWindow->show();
+
+    // SerialHandler sinyalini tabloya bağla
+    connect(serialHandler, &SerialHandler::newDataPacket,
+            tableWindow, &DataTableWindow::onNewData);
 }
 

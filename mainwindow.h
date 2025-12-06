@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "plotterwindow.h"
 #include "fftplotterwindow.h"
+#include "datatablewindow.h"
 #include "serialhandler.h"
 #include <QTimer>
 #include <QThread>
@@ -29,11 +30,13 @@ private:
 
     QList<PlotterWindow*> plotList;
     QList<FFTPlotterWindow*> fftList;
+    DataTableWindow *tableWindow = nullptr;
+
     SerialHandler *serialHandler = nullptr;
     QThread *serialThread = nullptr;
 
     void scanSerialPorts();
-    void on_new_serial_data(int channel, qint64 timestamp, double value);
+    void on_new_serial_data(DataPacket packet);
     void onGraphDestroyed(QObject* obj);
     void onFFTGraphDestroyed(QObject* obj);
     void closeEvent(QCloseEvent *event) override;
@@ -44,5 +47,6 @@ private slots:
     void on_connectButton_clicked();
     void on_addGraphButton_clicked();
     void on_addFFTGraph_clicked();
+    void on_showTableView_clicked();
 };
 #endif // MAINWINDOW_H
