@@ -2,9 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "graphwindow.h"
-#include "fftgraph.h"
 #include "plotterwindow.h"
+#include "fftplotterwindow.h"
 #include "serialhandler.h"
 #include <QTimer>
 #include <QThread>
@@ -28,9 +27,8 @@ private:
 
     static constexpr uint8_t MAX_GRAPHS = 16;
 
-    QList<GraphWindow*> graphList;
     QList<PlotterWindow*> plotList;
-    QList<FFTGraph*> fftList;
+    QList<FFTPlotterWindow*> fftList;
     SerialHandler *serialHandler = nullptr;
     QThread *serialThread = nullptr;
 
@@ -42,11 +40,9 @@ private:
 
 private slots:
 
-    // void on_startGraphButton_clicked();
     void on_scanButton_clicked();
     void on_connectButton_clicked();
-    // void on_tabWidget_tabBarClicked(int index);
     void on_addGraphButton_clicked();
-    void on_pushButton_clicked();
+    void on_addFFTGraph_clicked();
 };
 #endif // MAINWINDOW_H

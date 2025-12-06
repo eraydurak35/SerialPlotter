@@ -4,12 +4,14 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <plotterwindow.h>
+#include <fftplotterwindow.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow) {
 
     ui->setupUi(this);
+    setWindowTitle(QString("Serial Analizer"));
     scanSerialPorts();
 
     serialThread = new QThread();
@@ -43,75 +45,41 @@ void MainWindow::on_scanButton_clicked() {
 
 void MainWindow::on_connectButton_clicked() {
 
-    // GraphWindow *g = new GraphWindow();
-    // g->addChannel(0);
-    // g->addChannel(2);
-    // connect(serialHandler, &SerialHandler::newData, g, &GraphWindow::onNewData);
-    // g->show();
 }
 
 void MainWindow::on_addGraphButton_clicked() {
 
-
-    // PlotterWindow *pw = new PlotterWindow();
-    // pw->setAttribute(Qt::WA_DeleteOnClose);  // pencere kapanınca hafızadan silinsin
-    // pw->show();
-
-
     PlotterWindow* gw = new PlotterWindow();
     gw->setAttribute(Qt::WA_DeleteOnClose);
     plotList.append(gw);
+    gw->setGraphIndex(plotList.size());
 
     connect(gw, &PlotterWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
     connect(serialHandler, &SerialHandler::newData, gw, &PlotterWindow::onNewData);
     gw->show();
 
-
-    // GraphWindow* gw = new GraphWindow(nullptr);
-    // gw->setAttribute(Qt::WA_DeleteOnClose);
-    // graphList.append(gw);
-
-    // connect(gw, &GraphWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
-    // connect(serialHandler, &SerialHandler::newData, gw, &GraphWindow::onNewData);
-    // gw->show();
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-    // FFTGraph *fft = new FFTGraph();
-    // fft->setAttribute(Qt::WA_DeleteOnClose);
-    // fftList.append(fft);
-
-    // connect(fft, &FFTGraph::graphClosed, this, &MainWindow::onFFTGraphDestroyed);
-    // connect(serialHandler, &SerialHandler::newData, fft, &FFTGraph::onNewData);
-    // fft->show();
-
-
-    // PlotterWindow *pw = new PlotterWindow();
-    // pw->setAttribute(Qt::WA_DeleteOnClose);  // pencere kapanınca hafızadan silinsin
-    // pw->show();
 }
 
 void MainWindow::onGraphDestroyed(QObject* obj) {
 
-    GraphWindow* gw = static_cast<GraphWindow*>(obj);
-    graphList.removeOne(gw);
+    PlotterWindow* gw = static_cast<PlotterWindow*>(obj);
+    plotList.removeOne(gw);
 }
 
 void MainWindow::onFFTGraphDestroyed(QObject* obj) {
 
-    FFTGraph* gw = static_cast<FFTGraph*>(obj);
+    FFTPlotterWindow* gw = static_cast<FFTPlotterWindow*>(obj);
     fftList.removeOne(gw);
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     // Tüm açık GraphWindow’ları kapat
-    for (GraphWindow* gw : graphList) {
+    for (PlotterWindow* gw : std::as_const(plotList)) {
         if (gw && gw->isVisible())
             gw->close();       // pencereyi kapatır
     }
 
-    for (FFTGraph* fft : fftList) {
+    for (FFTPlotterWindow* fft : std::as_const(fftList)) {
         if (fft && fft->isVisible())
             fft->close();
     }
@@ -119,4 +87,15 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     event->accept();
 }
 
+void MainWindow::on_addFFTGraph_clicked() {
+
+    FFTPlotterWindow* gw = new FFTPlotterWindow();
+    gw->setAttribute(Qt::WA_DeleteOnClose);
+    fftList.append(gw);
+    gw->setGraphIndex(fftList.size());
+
+    connect(gw, &FFTPlotterWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
+    connect(serialHandler, &SerialHandler::newData, gw, &FFTPlotterWindow::onNewData);
+    gw->show();
+}
 

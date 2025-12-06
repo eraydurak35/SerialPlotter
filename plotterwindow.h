@@ -17,6 +17,9 @@ public:
     ~PlotterWindow();
 
     void addChannel(int channel);
+    void setGraphIndex(int idx) {
+        setWindowTitle(QString("Graph %1").arg(idx));
+    }
 
 private:
     Ui::PlotterWindow *ui;

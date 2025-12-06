@@ -10,8 +10,9 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    fftgraph.cpp \
+    fftplotterwindow.cpp \
     fftworker.cpp \
+    fftworkermulti.cpp \
     kissfft-master/kiss_fft.c \
     main.cpp \
     mainwindow.cpp \
@@ -20,8 +21,9 @@ SOURCES += \
     serialhandler.cpp
 
 HEADERS += \
-    fftgraph.h \
+    fftplotterwindow.h \
     fftworker.h \
+    fftworkermulti.h \
     kissfft-master/kiss_fft.h \
     mainwindow.h \
     plotterwindow.h \
@@ -29,6 +31,7 @@ HEADERS += \
     serialhandler.h
 
 FORMS += \
+    fftplotterwindow.ui \
     mainwindow.ui \
     plotterwindow.ui
 

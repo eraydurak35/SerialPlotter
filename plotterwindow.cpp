@@ -6,7 +6,7 @@ PlotterWindow::PlotterWindow(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::PlotterWindow) {
     ui->setupUi(this);
-
+    ui->tabWidget->setCurrentIndex(0);
 
     QList<QColor> palette = {
         QColor(0xff0000), // 0 - kırmızı
@@ -123,7 +123,7 @@ void PlotterWindow::createSignalSelector(int count) {
         int row = ch / cols;
         int col = ch % cols;
 
-        ui->tab1_gridlayout->addWidget(container, row, col);
+        ui->signals_tab_grid_layout->addWidget(container, row, col);
 
         connect(chk, &QCheckBox::toggled, this, [=](bool on){
             if (on) addChannel(ch);
@@ -138,6 +138,7 @@ void PlotterWindow::removeChannel(int channel) {
     if (!graphMap.contains(channel))
         return;
 
+    ui->plot->removeGraph(graphMap[channel]);
     graphMap.remove(channel);
 }
 

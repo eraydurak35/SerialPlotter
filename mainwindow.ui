@@ -20,7 +20,7 @@
       <x>70</x>
       <y>10</y>
       <width>111</width>
-      <height>168</height>
+      <height>198</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -72,20 +72,14 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="addFFTGraph">
+       <property name="text">
+        <string>Add FFT Graph</string>
+       </property>
+      </widget>
+     </item>
     </layout>
-   </widget>
-   <widget class="QPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>210</y>
-      <width>80</width>
-      <height>24</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>FFT</string>
-    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

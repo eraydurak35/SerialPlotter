@@ -1,0 +1,87 @@
+# ============================================
+# Qt / C++ Project .gitignore
+# ============================================
+
+# Qt Creator user-specific files
+*.pro.user
+*.pri.user
+*.pro.user.*
+*.qmlproject.user
+*.qbs.user
+*.qbs.user.*
+*.creator
+*.creator.user
+*.creator.user.*
+
+# Build directories
+build*/
+Build*/
+build-*/
+cmake-build-*/
+out*/
+bin/
+obj/
+*.o
+*.obj
+*.a
+*.so
+*.dll
+*.dylib
+*.exe
+
+# Qt generated files
+moc_*.cpp
+moc_*.h
+ui_*.h
+qrc_*.cpp
+*.qrc.dep
+*.qrc.autogen/
+*.moc
+*.autosave
+
+# Qt Installer Framework artifacts
+*.tmp
+*.log
+*.7z
+*.zip
+installer/packages/
+installer/config/
+installer/output/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+CMakeScripts/
+cmake_install.cmake
+CTestTestfile.cmake
+Makefile
+compile_commands.json
+
+# QML cache
+.qmlcache/
+*.qmltypes
+*.qmlc
+
+# QBS build files
+.qbs/
+.qbsbuild/
+
+# Qt Test output
+*.gcda
+*.gcno
+*.gcov
+
+# Visual Studio / CLion / VSCode extra files (optional)
+*.sln
+*.vcxproj*
+.idea/
+.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python virtual environments (if using scripts/tools)
+venv/
+.venv/
