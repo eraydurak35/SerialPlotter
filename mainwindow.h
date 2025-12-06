@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "graphwindow.h"
 #include "fftgraph.h"
+#include "plotterwindow.h"
 #include "serialhandler.h"
 #include <QTimer>
 #include <QThread>
@@ -28,6 +29,7 @@ private:
     static constexpr uint8_t MAX_GRAPHS = 16;
 
     QList<GraphWindow*> graphList;
+    QList<PlotterWindow*> plotList;
     QList<FFTGraph*> fftList;
     SerialHandler *serialHandler = nullptr;
     QThread *serialThread = nullptr;

@@ -1,8 +1,7 @@
 QT       += core gui
-QT       += charts
 QT       += serialport
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 CONFIG += c++17
 
@@ -13,22 +12,25 @@ CONFIG += c++17
 SOURCES += \
     fftgraph.cpp \
     fftworker.cpp \
-    graphwindow.cpp \
     kissfft-master/kiss_fft.c \
     main.cpp \
     mainwindow.cpp \
+    plotterwindow.cpp \
+    qcustomplot/qcustomplot.cpp \
     serialhandler.cpp
 
 HEADERS += \
     fftgraph.h \
     fftworker.h \
-    graphwindow.h \
     kissfft-master/kiss_fft.h \
     mainwindow.h \
+    plotterwindow.h \
+    qcustomplot/qcustomplot.h \
     serialhandler.h
 
 FORMS += \
-    mainwindow.ui
+    mainwindow.ui \
+    plotterwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

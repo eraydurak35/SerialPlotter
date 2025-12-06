@@ -3,6 +3,7 @@
 #include <QRandomGenerator>
 #include <QSerialPortInfo>
 #include <QSerialPort>
+#include <plotterwindow.h>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -51,24 +52,44 @@ void MainWindow::on_connectButton_clicked() {
 
 void MainWindow::on_addGraphButton_clicked() {
 
-    GraphWindow* gw = new GraphWindow(nullptr);
-    gw->setAttribute(Qt::WA_DeleteOnClose);
-    graphList.append(gw);
 
-    connect(gw, &GraphWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
-    connect(serialHandler, &SerialHandler::newData, gw, &GraphWindow::onNewData);
+    // PlotterWindow *pw = new PlotterWindow();
+    // pw->setAttribute(Qt::WA_DeleteOnClose);  // pencere kapanınca hafızadan silinsin
+    // pw->show();
+
+
+    PlotterWindow* gw = new PlotterWindow();
+    gw->setAttribute(Qt::WA_DeleteOnClose);
+    plotList.append(gw);
+
+    connect(gw, &PlotterWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
+    connect(serialHandler, &SerialHandler::newData, gw, &PlotterWindow::onNewData);
     gw->show();
+
+
+    // GraphWindow* gw = new GraphWindow(nullptr);
+    // gw->setAttribute(Qt::WA_DeleteOnClose);
+    // graphList.append(gw);
+
+    // connect(gw, &GraphWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
+    // connect(serialHandler, &SerialHandler::newData, gw, &GraphWindow::onNewData);
+    // gw->show();
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    FFTGraph *fft = new FFTGraph();
-    fft->setAttribute(Qt::WA_DeleteOnClose);
-    fftList.append(fft);
+    // FFTGraph *fft = new FFTGraph();
+    // fft->setAttribute(Qt::WA_DeleteOnClose);
+    // fftList.append(fft);
 
-    connect(fft, &FFTGraph::graphClosed, this, &MainWindow::onFFTGraphDestroyed);
-    connect(serialHandler, &SerialHandler::newData, fft, &FFTGraph::onNewData);
-    fft->show();
+    // connect(fft, &FFTGraph::graphClosed, this, &MainWindow::onFFTGraphDestroyed);
+    // connect(serialHandler, &SerialHandler::newData, fft, &FFTGraph::onNewData);
+    // fft->show();
+
+
+    // PlotterWindow *pw = new PlotterWindow();
+    // pw->setAttribute(Qt::WA_DeleteOnClose);  // pencere kapanınca hafızadan silinsin
+    // pw->show();
 }
 
 void MainWindow::onGraphDestroyed(QObject* obj) {

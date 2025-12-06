@@ -1,0 +1,14 @@
+release/fftgraph.o
+release/fftworker.o
+release/kiss_fft.o
+release/main.o
+release/mainwindow.o
+release/plotterwindow.o
+release/qcustomplot.o
+release/serialhandler.o
+release/moc_fftgraph.o
+release/moc_fftworker.o
+release/moc_mainwindow.o
+release/moc_plotterwindow.o
+release/moc_qcustomplot.o
+release/moc_serialhandler.o
