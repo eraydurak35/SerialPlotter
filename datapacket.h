@@ -4,10 +4,9 @@
 #include <QVector>
 #include <QtGlobal>
 
-struct DataPacket
-{
-    qint64 timestamp;
-    QVector<double> values;   // örn: [ch0, ch1, ch2, ch3, ch4]
+struct DataPacket {
+    uint32_t timestamp;
+    QVector<float> values;
 };
 
 #endif // DATAPACKET_H

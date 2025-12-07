@@ -33,7 +33,7 @@ void FFTWorkerMulti::addSample(DataPacket packet) {
             return;
 
         auto &buf = channelBuffers[i];
-        static qint64 buff_start_timestamp = 0;
+        static uint32_t buff_start_timestamp = 0;
 
         if (i == 0 && buf.size() == 0) {
             buff_start_timestamp = packet.timestamp;

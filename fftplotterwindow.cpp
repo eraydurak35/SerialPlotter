@@ -52,6 +52,12 @@ FFTPlotterWindow::FFTPlotterWindow(QWidget *parent)
     ui->plot->xAxis->setLabel("Frequency (Hz)");
     ui->plot->yAxis->setLabel("Magnitude (dB)");
 
+    ui->plot->xAxis->setLabelColor(QColor(0xFFFFFF));
+    ui->plot->yAxis->setLabelColor(QColor(0xFFFFFF));
+
+    ui->plot->xAxis->setLabelFont(QFont("Arial", 8));
+    ui->plot->yAxis->setLabelFont(QFont("Arial", 8));
+
     ui->plot->legend->setVisible(true);
     ui->plot->legend->setBrush(QColor(0x101010));
     ui->plot->legend->setTextColor(Qt::white);
@@ -108,6 +114,18 @@ void FFTPlotterWindow::closeEvent(QCloseEvent *event) {
 // ----------------------------------------------------------------------
 void FFTPlotterWindow::onNewData(DataPacket packet) {
 
+    static uint32_t start_timestamp = 0;
+    static uint32_t counter = 0;
+
+    if (counter++ == 0) {
+        start_timestamp = packet.timestamp;
+    }
+    else if (counter++ >= 1000) {
+        uint32_t newDataFrequency = 500000 / (packet.timestamp - start_timestamp);
+        ui->dataFreq->setText(QString("%1 Hz").arg(newDataFrequency));
+        counter = 0;
+    }
+
     // Gerekiyorsa yeni kanal ekle
     for (int i = 0; i < packet.values.size(); i++) {
         if ((i + 1) > max_channel_count) {
@@ -115,6 +133,8 @@ void FFTPlotterWindow::onNewData(DataPacket packet) {
             max_channel_count = i + 1;
         }
     }
+
+
 
     emit addNewFFTData(packet);
 }
@@ -150,6 +170,7 @@ void FFTPlotterWindow::createSignalSelector(int count) {
     for (int ch = 0; ch < count; ++ch)
     {
         QCheckBox *chk = new QCheckBox(QString("Ch %1").arg(ch));
+        chk->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
         QFrame *colorBox = new QFrame();
         colorBox->setFixedSize(14, 14);

@@ -39,6 +39,7 @@ private:
     void on_new_serial_data(DataPacket packet);
     void onGraphDestroyed(QObject* obj);
     void onFFTGraphDestroyed(QObject* obj);
+    void showSerialPopup(const QString &msg);
     void closeEvent(QCloseEvent *event) override;
 
 private slots:
@@ -48,5 +49,11 @@ private slots:
     void on_addGraphButton_clicked();
     void on_addFFTGraph_clicked();
     void on_showTableView_clicked();
+    void onSerialConnected();
+    void onSerialDisconnected();
+
+signals:
+    void requestOpenPort(QString portName, int baudrate);
+    void requestClosePort();
 };
 #endif // MAINWINDOW_H

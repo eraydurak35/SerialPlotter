@@ -39,6 +39,19 @@ PlotterWindow::PlotterWindow(QWidget *parent)
     ui->plot->xAxis->setTickLabelColor(QColor(0xFFFFFF));
     ui->plot->yAxis->setTickLabelColor(QColor(0xFFFFFF));
 
+    ui->plot->xAxis->setLabel("Time (s)");
+
+    ui->plot->xAxis->setLabelColor(QColor(0xFFFFFF));
+    ui->plot->yAxis->setLabelColor(QColor(0xFFFFFF));
+
+    ui->plot->xAxis->setLabelFont(QFont("Arial", 8));
+    ui->plot->yAxis->setLabelFont(QFont("Arial", 8));
+
+    ui->plot->setInteractions(
+        QCP::iRangeZoom //|      // Mouse wheel ile zoom
+        // QCP::iRangeDrag        // Mouse drag ile pan
+        );
+
 }
 
 PlotterWindow::~PlotterWindow() {
@@ -52,6 +65,18 @@ void PlotterWindow::closeEvent(QCloseEvent *event) {
 }
 
 void PlotterWindow::onNewData(DataPacket packet) {
+
+    static uint32_t start_timestamp = 0;
+    static uint32_t counter = 0;
+
+    if (counter++ == 0) {
+        start_timestamp = packet.timestamp;
+    }
+    else if (counter++ >= 1000) {
+        uint32_t newDataFrequency = 500000 / (packet.timestamp - start_timestamp);
+        ui->dataFreq->setText(QString("%1 Hz").arg(newDataFrequency));
+        counter = 0;
+    }
 
     for (int i = 0; i < packet.values.size(); i++) {
 
@@ -104,6 +129,7 @@ void PlotterWindow::createSignalSelector(int count) {
     for (int ch = 0; ch < count; ++ch) {
 
         QCheckBox *chk = new QCheckBox(QString("Ch %1").arg(ch));
+        chk->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
         QFrame *colorBox = new QFrame();
         colorBox->setFixedSize(14, 14);

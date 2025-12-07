@@ -19,13 +19,54 @@ MainWindow::MainWindow(QWidget *parent)
     serialHandler->moveToThread(serialThread);
     serialThread->start();
 
+    connect(serialHandler, &SerialHandler::connected, this, &MainWindow::onSerialConnected, Qt::QueuedConnection);
+    connect(serialHandler, &SerialHandler::disconnected, this, &MainWindow::onSerialDisconnected, Qt::QueuedConnection);
+
+    connect(this, &MainWindow::requestOpenPort, serialHandler, &SerialHandler::openPort, Qt::QueuedConnection);
+    connect(this, &MainWindow::requestClosePort, serialHandler, &SerialHandler::closePort, Qt::QueuedConnection);
+    connect(serialHandler, &SerialHandler::statusMessage, this, &MainWindow::showSerialPopup, Qt::QueuedConnection);
 }
 
 MainWindow::~MainWindow() {
+
+    serialThread->quit();
+    serialThread->wait();
+
+    delete serialHandler;
+    delete serialThread;
     delete ui;
 }
 
+void MainWindow::showSerialPopup(const QString &msg) {
+
+    // QMessageBox::information(this, "Serial Message", msg);
+
+    QMessageBox *box = new QMessageBox(QMessageBox::Information,
+                                       "Serial Message",
+                                       msg,
+                                       QMessageBox::Ok,
+                                       this);
+
+    box->setAttribute(Qt::WA_DeleteOnClose);
+
+    // 1 saniye sonra otomatik kapanır
+    QTimer::singleShot(1000, box, &QMessageBox::accept);
+
+    box->show();
+}
+
+void MainWindow::onSerialConnected() {
+
+    ui->connectButton->setText("Disconnect");
+}
+
+void MainWindow::onSerialDisconnected() {
+
+    ui->connectButton->setText("Connect");
+}
+
 void MainWindow::scanSerialPorts() {
+
     ui->serialPorts->clear();   // önce temizle
 
     const auto ports = QSerialPortInfo::availablePorts();
@@ -39,12 +80,22 @@ void MainWindow::scanSerialPorts() {
 }
 
 void MainWindow::on_scanButton_clicked() {
+
     scanSerialPorts();
 }
 
 
 void MainWindow::on_connectButton_clicked() {
 
+    QString port = ui->serialPorts->currentText();
+    int baud = ui->baudRates->currentText().toInt();
+
+    if (serialHandler->isSerialOpen()) {
+        emit requestClosePort();
+    }
+    else {
+        emit requestOpenPort(port, baud);
+    }
 }
 
 void MainWindow::on_addGraphButton_clicked() {
