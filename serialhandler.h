@@ -7,7 +7,7 @@
 #include "qserialport.h"
 
 
-// #define DEMO_MODE
+#define DEMO_MODE
 
 class SerialHandler : public QObject
 {

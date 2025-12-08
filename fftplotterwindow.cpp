@@ -114,17 +114,7 @@ void FFTPlotterWindow::closeEvent(QCloseEvent *event) {
 // ----------------------------------------------------------------------
 void FFTPlotterWindow::onNewData(DataPacket packet) {
 
-    static uint32_t start_timestamp = 0;
-    static uint32_t counter = 0;
-
-    if (counter++ == 0) {
-        start_timestamp = packet.timestamp;
-    }
-    else if (counter++ >= 1000) {
-        uint32_t newDataFrequency = 500000 / (packet.timestamp - start_timestamp);
-        ui->dataFreq->setText(QString("%1 Hz").arg(newDataFrequency));
-        counter = 0;
-    }
+    ui->dataFreq->setText(QString("%1 Hz").arg(QString::number(packet.data_frequency, 'f', 0)));
 
     // Gerekiyorsa yeni kanal ekle
     for (int i = 0; i < packet.values.size(); i++) {
@@ -133,8 +123,6 @@ void FFTPlotterWindow::onNewData(DataPacket packet) {
             max_channel_count = i + 1;
         }
     }
-
-
 
     emit addNewFFTData(packet);
 }

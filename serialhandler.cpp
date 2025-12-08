@@ -149,6 +149,26 @@ void SerialHandler::onReadyRead()
             packet.values.append(f);
         }
 
+        static int i = 0;
+        static float data_freq = 0;
+        static uint32_t window_start_timestamp = 0;
+        static bool is_initialized = false;
+
+        if (!is_initialized) {
+            window_start_timestamp = packet.timestamp;
+            is_initialized = true;
+        }
+
+        if (i++ >= 200) {
+            i = 0;
+            float time_diff = static_cast<float>(packet.timestamp) - static_cast<float>(window_start_timestamp);
+            window_start_timestamp = packet.timestamp;
+            if (time_diff > 0) {
+                data_freq = 200000.0f / time_diff;
+            }
+        }
+
+        packet.data_frequency = data_freq;
         emit newDataPacket(packet);
     }
 }
@@ -192,6 +212,7 @@ void SerialHandler::generateFakeData() {
         packet.values[ch] = value;
     }
 
+    packet.data_frequency = 1000.0f;
     emit newDataPacket(packet);
 }
 

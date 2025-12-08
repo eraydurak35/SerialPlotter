@@ -6,6 +6,7 @@
 
 struct DataPacket {
     uint32_t timestamp;
+    float data_frequency;
     QVector<float> values;
 };
 
