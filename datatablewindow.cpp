@@ -9,15 +9,18 @@ DataTableWindow::DataTableWindow(QWidget *parent) :
 }
 
 DataTableWindow::~DataTableWindow() {
+    delete model;
     delete ui;
+}
+
+void DataTableWindow::closeEvent(QCloseEvent *event) {
+    emit tableClosed(this);
+    QWidget::closeEvent(event);
 }
 
 void DataTableWindow::onNewData(DataPacket packet) {
 
-    static bool is_table_created = false;
-
-    if (!is_table_created) {
-        is_table_created = true;
+    if (model == nullptr) {
 
         model = new QStandardItemModel(this);
 

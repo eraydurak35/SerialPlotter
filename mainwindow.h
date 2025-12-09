@@ -6,6 +6,7 @@
 #include "fftplotterwindow.h"
 #include "datatablewindow.h"
 #include "serialhandler.h"
+#include "dsppipelinewindow.h"
 #include <QTimer>
 #include <QThread>
 
@@ -31,6 +32,7 @@ private:
     QList<PlotterWindow*> plotList;
     QList<FFTPlotterWindow*> fftList;
     DataTableWindow *tableWindow = nullptr;
+    DSPPipeLineWindow *dspPipeLineWindow = nullptr;
 
     SerialHandler *serialHandler = nullptr;
     QThread *serialThread = nullptr;
@@ -39,6 +41,7 @@ private:
     void on_new_serial_data(DataPacket packet);
     void onGraphDestroyed(QObject* obj);
     void onFFTGraphDestroyed(QObject* obj);
+    void onTableWindowDestroyed(QObject* obj);
     void showSerialPopup(const QString &msg);
     void closeEvent(QCloseEvent *event) override;
 
@@ -51,6 +54,8 @@ private slots:
     void on_showTableView_clicked();
     void onSerialConnected();
     void onSerialDisconnected();
+
+    void on_DSPPipeLineWindow_clicked();
 
 signals:
     void requestOpenPort(QString portName, int baudrate);

@@ -123,6 +123,12 @@ void MainWindow::onFFTGraphDestroyed(QObject* obj) {
     fftList.removeOne(gw);
 }
 
+void MainWindow::onTableWindowDestroyed(QObject* obj) {
+
+    delete tableWindow;
+    tableWindow = nullptr;
+}
+
 void MainWindow::closeEvent(QCloseEvent *event) {
     // Tüm açık GraphWindow’ları kapat
     for (PlotterWindow* gw : std::as_const(plotList)) {
@@ -133,6 +139,10 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     for (FFTPlotterWindow* fft : std::as_const(fftList)) {
         if (fft && fft->isVisible())
             fft->close();
+    }
+
+    if (tableWindow && tableWindow->isVisible()) {
+        tableWindow->close();
     }
 
     event->accept();
@@ -153,11 +163,22 @@ void MainWindow::on_addFFTGraph_clicked() {
 
 void MainWindow::on_showTableView_clicked() {
 
-    tableWindow = new DataTableWindow();
-    tableWindow->show();
+    if (tableWindow == nullptr) {
+        tableWindow = new DataTableWindow();
+        // SerialHandler sinyalini tabloya bağla
+        connect(serialHandler, &SerialHandler::newDataPacket, tableWindow, &DataTableWindow::onNewData);
+        connect(tableWindow, &DataTableWindow::tableClosed, this, &MainWindow::onTableWindowDestroyed);
 
-    // SerialHandler sinyalini tabloya bağla
-    connect(serialHandler, &SerialHandler::newDataPacket,
-            tableWindow, &DataTableWindow::onNewData);
+        tableWindow->show();
+    }
+}
+
+
+void MainWindow::on_DSPPipeLineWindow_clicked() {
+
+    if (dspPipeLineWindow == nullptr) {
+        dspPipeLineWindow = new DSPPipeLineWindow();
+        dspPipeLineWindow->show();
+    }
 }
 

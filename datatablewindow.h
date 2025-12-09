@@ -22,9 +22,13 @@ public slots:
 
 private:
     Ui::DataTableWindow *ui;
-    QStandardItemModel *model;
+    QStandardItemModel *model = nullptr;
+
+    void closeEvent(QCloseEvent *event);
 
     int max_channel_count = 0;
+signals:
+    void tableClosed(DataTableWindow* self);
 };
 
 #endif // DATATABLEWINDOW_H

@@ -11,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     datatablewindow.cpp \
+    dsppipelinewindow.cpp \
     fftplotterwindow.cpp \
     fftworkermulti.cpp \
     kissfft-master/kiss_fft.c \
@@ -23,6 +24,7 @@ SOURCES += \
 HEADERS += \
     datapacket.h \
     datatablewindow.h \
+    dsppipelinewindow.h \
     fftplotterwindow.h \
     fftworkermulti.h \
     kissfft-master/kiss_fft.h \
@@ -33,6 +35,7 @@ HEADERS += \
 
 FORMS += \
     datatablewindow.ui \
+    dsppipelinewindow.ui \
     fftplotterwindow.ui \
     mainwindow.ui \
     plotterwindow.ui
