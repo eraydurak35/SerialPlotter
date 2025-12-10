@@ -11,6 +11,7 @@ CONFIG += c++17
 
 SOURCES += \
     datatablewindow.cpp \
+    dspbase.cpp \
     dsppipelinewindow.cpp \
     fftplotterwindow.cpp \
     fftworkermulti.cpp \
@@ -24,6 +25,7 @@ SOURCES += \
 HEADERS += \
     datapacket.h \
     datatablewindow.h \
+    dspbase.h \
     dsppipelinewindow.h \
     fftplotterwindow.h \
     fftworkermulti.h \

@@ -48,32 +48,7 @@
       <widget class="QComboBox" name="baudRates">
        <item>
         <property name="text">
-         <string>9600</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>19200</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>38400</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>57600</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>115200</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>230400</string>
+         <string>921600</string>
         </property>
        </item>
        <item>
@@ -83,7 +58,32 @@
        </item>
        <item>
         <property name="text">
-         <string>921600</string>
+         <string>230400</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>115200</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>57600</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>38400</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>19200</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>9600</string>
         </property>
        </item>
       </widget>
@@ -112,7 +112,7 @@
      <item>
       <widget class="QPushButton" name="showTableView">
        <property name="text">
-        <string>Show Table View</string>
+        <string>Table View</string>
        </property>
       </widget>
      </item>

@@ -21,10 +21,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     connect(serialHandler, &SerialHandler::connected, this, &MainWindow::onSerialConnected, Qt::QueuedConnection);
     connect(serialHandler, &SerialHandler::disconnected, this, &MainWindow::onSerialDisconnected, Qt::QueuedConnection);
+    connect(serialHandler, &SerialHandler::statusMessage, this, &MainWindow::showSerialPopup, Qt::QueuedConnection);
 
     connect(this, &MainWindow::requestOpenPort, serialHandler, &SerialHandler::openPort, Qt::QueuedConnection);
     connect(this, &MainWindow::requestClosePort, serialHandler, &SerialHandler::closePort, Qt::QueuedConnection);
-    connect(serialHandler, &SerialHandler::statusMessage, this, &MainWindow::showSerialPopup, Qt::QueuedConnection);
+
 }
 
 MainWindow::~MainWindow() {
@@ -76,7 +77,7 @@ void MainWindow::scanSerialPorts() {
 
     // Eğer port yoksa kullanıcıya bilgi ver
     if (ui->serialPorts->count() == 0)
-        ui->serialPorts->addItem("No COM Ports");
+        ui->serialPorts->addItem("No Serial Ports");
 }
 
 void MainWindow::on_scanButton_clicked() {
@@ -123,7 +124,7 @@ void MainWindow::onFFTGraphDestroyed(QObject* obj) {
     fftList.removeOne(gw);
 }
 
-void MainWindow::onTableWindowDestroyed(QObject* obj) {
+void MainWindow::onTableWindowDestroyed([[maybe_unused]]QObject* obj) {
 
     delete tableWindow;
     tableWindow = nullptr;

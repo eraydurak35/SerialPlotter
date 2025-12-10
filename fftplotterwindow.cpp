@@ -36,8 +36,8 @@ FFTPlotterWindow::FFTPlotterWindow(QWidget *parent)
     // --------------------------------------------------
     //  PLOT TEMA (FFT İÇİN)
     // --------------------------------------------------
-    ui->plot->setBackground(QColor(0x121212));
-    ui->plot->axisRect()->setBackground(QColor(0x1E1E1E));
+    ui->plot->setBackground(QColor(53,53,53));
+    ui->plot->axisRect()->setBackground(QColor(53,53,53));
 
     ui->plot->xAxis->setBasePen(QPen(QColor(0xBBBBBB)));
     ui->plot->yAxis->setBasePen(QPen(QColor(0xBBBBBB)));
