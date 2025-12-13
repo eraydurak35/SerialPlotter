@@ -4,7 +4,6 @@
 #include "dspbase.h"
 #include "qboxlayout.h"
 #include "qdialog.h"
-#include "qlabel.h"
 #include "qpushbutton.h"
 #include "qspinbox.h"
 
@@ -12,18 +11,14 @@ class LowPassFilter : public DSPBase
 {
 public:
 
-    LowPassFilter() : cutoffHz(5.0f) {}
+    LowPassFilter() {}
 
+    float process(float in, float fs) override {
+        if (bypass)
+            return in;
 
-    QVector<float> process(const QVector<float>& in, float freq) override {
-        sampleHz = freq;
-
-        if (state.size() != in.size())
-            state = QVector<float>(in.size(), 0.0f);
-
-        for (int i = 0; i < in.size(); ++i)
-            state[i] += alpha * (in[i] - state[i]);
-
+        alpha = computeAlpha(cutoffHz, fs);
+        state += alpha * (in - state);
         return state;
     }
 
@@ -33,36 +28,35 @@ public:
         dlg.setWindowTitle("LowPass Filter");
 
         QVBoxLayout *l = new QVBoxLayout(&dlg);
-
-        QDoubleSpinBox *cutoff = new QDoubleSpinBox();
-        cutoff->setRange(0.1, 1000);
-        cutoff->setValue(cutoffHz);
-        cutoff->setSuffix(" Hz");
-
-        l->addWidget(new QLabel("Cutoff Frequency"));
-        l->addWidget(cutoff);
+        QDoubleSpinBox *cut = new QDoubleSpinBox();
+        cut->setRange(0.1, 500);
+        cut->setSuffix(" Hz");
+        cut->setValue(cutoffHz);
 
         QPushButton *ok = new QPushButton("OK");
+
+        l->addWidget(cut);
         l->addWidget(ok);
 
         QObject::connect(ok, &QPushButton::clicked, &dlg, &QDialog::accept);
 
-        if (dlg.exec() == QDialog::Accepted) {
-            cutoffHz = cutoff->value();
-            alpha = computeAlpha(cutoffHz, sampleHz);
-        }
+        if (dlg.exec() == QDialog::Accepted)
+            cutoffHz = cut->value();
     }
 private:
 
-    inline float computeAlpha(float cutoffHz, float sampleHz) {
-        const float wc = 2.0f * M_PI * cutoffHz;
-        return wc / (wc + sampleHz);
+    static float computeAlpha(float fc, float fs) {
+
+        if (fs < 1.0) { fs = 1.0; }
+        if (fc < 0.1) { fc = 0.1; }
+        float wc = 2.0f * M_PI * fc;
+        return wc / (wc + fs);
     }
 
-    QVector<float> state;
-    float cutoffHz;
+
+    float cutoffHz = 5.0f;
     float alpha = 0.1f;
-    float sampleHz = 100.0f;
+    float state = 0.0f;
 };
 
 #endif // LOWPASSFILTER_H

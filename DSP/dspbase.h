@@ -1,7 +1,6 @@
 #ifndef DSPBASE_H
 #define DSPBASE_H
 
-#include "datapacket.h"
 #include <QWidget>
 
 class DSPBase
@@ -9,10 +8,14 @@ class DSPBase
 public:
 
     virtual ~DSPBase() = default;
-    virtual QVector<float> process(const QVector<float> &in, float freq) = 0;
-
-    // 👇 Config UI hook
+    virtual float process(float in, float fs) = 0;
     virtual void showConfigDialog(QWidget *parent) = 0;
+
+    void setBypass(bool b) { bypass = b; }
+    bool isBypassed() const { return bypass; }
+
+protected:
+    bool bypass = false;
 };
 
 

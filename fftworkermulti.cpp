@@ -14,6 +14,7 @@ FFTWorkerMulti::~FFTWorkerMulti() {
 }
 
 void FFTWorkerMulti::enableChannel(int ch) {
+
     activeChannels.insert(ch);
 
     if (!channelBuffers.contains(ch))
@@ -30,21 +31,21 @@ void FFTWorkerMulti::addSample(DataPacket packet) {
 
     for (int i = 0; i < packet.values.size(); i++) {
 
-        if (!activeChannels.contains(i))
-            return;
+        if (activeChannels.contains(i)) {
 
-        auto &buf = channelBuffers[i];
-        buf.append(packet.values[i]);
+            auto &buf = channelBuffers[i];
+            buf.append(packet.values[i]);
 
-        if (buf.size() >= windowSize) {
-            computeFFT(i);
-            buf.clear();
+            if (buf.size() >= windowSize) {
+                computeFFT(i);
+                buf.clear();
+            }
         }
     }
-
 }
 
 void FFTWorkerMulti::computeFFT(int channel) {
+
     auto &buf = channelBuffers[channel];
     auto &freqs = channelFreqs[channel];
     auto &mags = channelMags[channel];

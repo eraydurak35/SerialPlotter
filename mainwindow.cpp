@@ -163,6 +163,7 @@ void MainWindow::on_addFFTGraph_clicked() {
 
     connect(gw, &FFTPlotterWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
     connect(serialHandler, &SerialHandler::newDataPacket, gw, &FFTPlotterWindow::onNewData);
+    connect(dspPipeLineWindow, &DSPPipeLineWindow::newDSPOutput, gw, &FFTPlotterWindow::onNewDSPData);
     gw->show();
 }
 

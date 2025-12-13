@@ -16,6 +16,8 @@
 # Build directories
 build*/
 Build*/
+debug*/
+release*/
 build-*/
 cmake-build-*/
 out*/
@@ -38,6 +40,9 @@ qrc_*.cpp
 *.qrc.autogen/
 *.moc
 *.autosave
+*.qtc_clangd
+*.qtc_clangd/
+*.qmake.stash
 
 # Qt Installer Framework artifacts
 *.tmp

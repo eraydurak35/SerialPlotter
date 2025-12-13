@@ -9,16 +9,30 @@ PlotterWindow::PlotterWindow(QWidget *parent)
     ui->tabWidget->setCurrentIndex(0);
 
     QList<QColor> palette = {
-        QColor(0xff0000), // 0 - kırmızı
-        QColor(0x00ff00), // 1 - yeşil
-        QColor(0x0000ff), // 2 - mavi
-        QColor(0xffff00), // 3 - sarı
-        QColor(0xff00ff), // 4 - magenta
-        QColor(0x00ffff), // 5 - cyan
-        QColor(0xffaa00),
-        QColor(0x00ffaa),
-        QColor(0xaa00ff),
-        QColor(0xffffff)
+        QColor(0xff0000), // 0 - Red
+        QColor(0x00ff00), // 1 - Green
+        QColor(0x0000ff), // 2 - Blue
+        QColor(0xffff00), // 3 - Yellow
+        QColor(0xff00ff), // 4 - Magenta
+        QColor(0x00ffff), // 5 - Cyan
+
+        QColor(0x2ca02c), // 6 - Dark Green
+        QColor(0xff7f0e), // 7 - Orange
+        QColor(0x1f77b4), // 8 - Steel Blue
+        QColor(0xd62728), // 9 - Dark Red
+
+        QColor(0x9467bd), // 10 - Purple
+        QColor(0x8c564b), // 11 - Brown
+        QColor(0xe377c2), // 12 - Pink
+        QColor(0x7f7f7f), // 13 - Gray
+
+        QColor(0xbcbd22), // 14 - Olive
+        QColor(0x17becf), // 15 - Teal
+
+        QColor(0xffc107), // 16 - Amber
+        QColor(0x03a9f4), // 17 - Light Blue
+        QColor(0x4caf50), // 18 - Lime Green
+        QColor(0x9c27b0)  // 19 - Deep Purple
     };
 
     for (int i = 0; i < palette.size(); i++)
@@ -144,9 +158,9 @@ void PlotterWindow::addDSPChannel(int channel) {
         return;
 
     QCPGraph *g = ui->plot->addGraph();
-    // Rengi ata
-    QColor c = channelColors.contains(channel)
-                   ? channelColors[channel]
+    // Aynı renkler aynı channel ile eşleşmesin diye offset ekliyoruz
+    QColor c = channelColors.contains(channel + max_channel_count)
+                   ? channelColors[channel + max_channel_count]
                    : QColor::fromHsv((channel * 36) % 360, 255, 255);  // fallback
 
     g->setPen(QPen(c, 1));
@@ -212,7 +226,7 @@ void PlotterWindow::createDSPSignalSelector(int count) {
         colorBox->setFixedSize(14, 14);
         colorBox->setFrameStyle(QFrame::Box | QFrame::Plain);
 
-        QColor c = channelColors[ch];
+        QColor c = channelColors[ch + count];
         colorBox->setStyleSheet(QString("background-color: %1;").arg(c.name()));
 
         // Checkbox + renk kutusu için minik yatay layout

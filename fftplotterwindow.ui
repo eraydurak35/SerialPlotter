@@ -41,7 +41,7 @@
      </property>
      <widget class="QWidget" name="signals_tab">
       <attribute name="title">
-       <string>Signals</string>
+       <string>Raw Signals</string>
       </attribute>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
@@ -57,6 +57,27 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="text">
+            <string>0 Hz</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>DSP Signals</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <layout class="QGridLayout" name="dspSignalsTabGridLayout"/>
+       </item>
+       <item>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <widget class="QLabel" name="dspDataFreq">
            <property name="text">
             <string>0 Hz</string>
            </property>

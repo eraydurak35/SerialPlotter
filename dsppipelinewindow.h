@@ -2,13 +2,25 @@
 #define DSPPIPELINEWINDOW_H
 
 #include "datapacket.h"
+#include "qlabel.h"
 #include "qlistwidget.h"
 #include <QWidget>
 #include "DSP/dspbase.h"
+#include "qpushbutton.h"
 
-namespace Ui {
-class DSPPipeLineWindow;
-}
+struct ChannelPipeline {
+    int channelIndex;
+
+    QLabel *label;
+    QListWidget *listWidget;
+    QPushButton *addButton;
+
+    std::vector<std::unique_ptr<DSPBase>> blocks;
+};
+
+QT_BEGIN_NAMESPACE
+namespace Ui { class DSPPipeLineWindow; }
+QT_END_NAMESPACE
 
 class DSPPipeLineWindow : public QWidget
 {
@@ -18,11 +30,7 @@ public:
     explicit DSPPipeLineWindow(QWidget *parent = nullptr);
     ~DSPPipeLineWindow();
 
-private slots:
-
-    void on_addProcessButton_clicked();
-    void onPipelineItemDoubleClicked(QListWidgetItem *item);
-    void onPipelineItemSingleClicked(QListWidgetItem *item);
+    void createPipelines(int channelCount);
 
 public slots:
     void onNewData(DataPacket packet);
@@ -31,11 +39,17 @@ signals:
     void newDSPOutput(DataPacket packet);
 
 private:
+
     Ui::DSPPipeLineWindow *ui;
-
     QList<QListWidgetItem*> listWidgetItemList;
-
     std::vector<std::unique_ptr<DSPBase>> pipeline;
+    std::vector<ChannelPipeline> pipelines;
+    int max_channel_count = 0;
+
+    void rebuildPipelineItemIndices();
+    void setupPipelineUI(int pipeIndex);
+    void showAddProcessMenu(int pipeIndex);
+    void rebuildPipelineIndices(ChannelPipeline &pipe);
 };
 
 #endif // DSPPIPELINEWINDOW_H
