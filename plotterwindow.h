@@ -17,7 +17,6 @@ public:
     explicit PlotterWindow(QWidget *parent = nullptr);
     ~PlotterWindow();
 
-    void addChannel(int channel);
     void setGraphIndex(int idx) {
         setWindowTitle(QString("Graph %1").arg(idx));
     }
@@ -27,20 +26,28 @@ private:
 
     void closeEvent(QCloseEvent *event);
     void createSignalSelector(int count);
+    void createDSPSignalSelector(int count);
+    void addChannel(int channel);
+    void addDSPChannel(int channel);
     void removeChannel(int channel);
+    void removeDSPChannel(int channel);
 
     QMap<int, QCPGraph*> graphMap;
+    QMap<int, QCPGraph*> dspGraphMap;
     int max_channel_count = 0;
+    int max_dsp_channel_count = 0;
     double xRange = 5.0;
     double yRange = 3.0;
     double yOffset = 0.0;
 
     QMap<int, QCheckBox*> channelCheckboxes;
+    QMap<int, QCheckBox*> DSPChannelCheckboxes;
 
     QMap<int, QColor> channelColors;
 
 public slots:
     void onNewData(DataPacket packet);
+    void onNewDSPData(DataPacket packet);
 
 signals:
 

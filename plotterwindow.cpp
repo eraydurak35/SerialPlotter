@@ -93,6 +93,35 @@ void PlotterWindow::onNewData(DataPacket packet) {
     }
 }
 
+void PlotterWindow::onNewDSPData(DataPacket packet) {
+
+    ui->dsp_data_freq->setText(QString("%1 Hz").arg(QString::number(packet.data_frequency, 'f', 0)));
+
+    for (int i = 0; i < packet.values.size(); i++) {
+
+        if ((i + 1) > max_dsp_channel_count) {
+            createDSPSignalSelector(i + 1);
+            max_dsp_channel_count = i + 1;
+        }
+
+        // Kanal yoksa (seçilmemişse) çık
+        if (dspGraphMap.contains(i)) {
+            double tSec = packet.timestamp / 1000.0;
+
+            QCPGraph *g = dspGraphMap[i];
+
+            // --- QCustomPlot'ta veri ekleme ---
+            g->addData(tSec, packet.values[i]);
+
+            // --- Kaydırmalı X ekseni ---
+            ui->plot->xAxis->setRange(tSec - xRange, tSec);
+
+            // --- Yeniden çizim ---
+            ui->plot->replot(QCustomPlot::rpQueuedReplot);
+        }
+    }
+}
+
 void PlotterWindow::addChannel(int channel) {
     if (graphMap.contains(channel))
         return;
@@ -110,11 +139,28 @@ void PlotterWindow::addChannel(int channel) {
     graphMap[channel] = g;
 }
 
+void PlotterWindow::addDSPChannel(int channel) {
+    if (dspGraphMap.contains(channel))
+        return;
+
+    QCPGraph *g = ui->plot->addGraph();
+    // Rengi ata
+    QColor c = channelColors.contains(channel)
+                   ? channelColors[channel]
+                   : QColor::fromHsv((channel * 36) % 360, 255, 255);  // fallback
+
+    g->setPen(QPen(c, 1));
+
+    g->setName(QString("Ch %1").arg(channel));
+
+    dspGraphMap[channel] = g;
+}
+
 void PlotterWindow::createSignalSelector(int count) {
 
     channelCheckboxes.clear();
 
-    const int cols = 10;
+    const int cols = 20;
 
     for (int ch = 0; ch < count; ++ch) {
 
@@ -151,11 +197,59 @@ void PlotterWindow::createSignalSelector(int count) {
     }
 }
 
+void PlotterWindow::createDSPSignalSelector(int count) {
+
+    DSPChannelCheckboxes.clear();
+
+    const int cols = 20;
+
+    for (int ch = 0; ch < count; ++ch) {
+
+        QCheckBox *chk = new QCheckBox(QString("Ch %1").arg(ch));
+        chk->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+        QFrame *colorBox = new QFrame();
+        colorBox->setFixedSize(14, 14);
+        colorBox->setFrameStyle(QFrame::Box | QFrame::Plain);
+
+        QColor c = channelColors[ch];
+        colorBox->setStyleSheet(QString("background-color: %1;").arg(c.name()));
+
+        // Checkbox + renk kutusu için minik yatay layout
+        QWidget *container = new QWidget();
+        QHBoxLayout *h = new QHBoxLayout(container);
+        h->setContentsMargins(0,0,0,0);
+        h->setSpacing(4);
+
+        h->addWidget(colorBox);
+        h->addWidget(chk);
+
+        int row = ch / cols;
+        int col = ch % cols;
+
+        ui->dsp_signals_layout->addWidget(container, row, col);
+
+        connect(chk, &QCheckBox::toggled, this, [=](bool on){
+            if (on) addDSPChannel(ch);
+            else    removeDSPChannel(ch);
+        });
+
+        DSPChannelCheckboxes[ch] = chk;
+    }
+}
+
 void PlotterWindow::removeChannel(int channel) {
     if (!graphMap.contains(channel))
         return;
     ui->plot->removeGraph(graphMap[channel]);
     graphMap.remove(channel);
+}
+
+void PlotterWindow::removeDSPChannel(int channel) {
+    if (!dspGraphMap.contains(channel))
+        return;
+    ui->plot->removeGraph(dspGraphMap[channel]);
+    dspGraphMap.remove(channel);
 }
 
 void PlotterWindow::on_yoffsetspinbox_valueChanged(double arg1) {

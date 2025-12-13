@@ -26,6 +26,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::requestOpenPort, serialHandler, &SerialHandler::openPort, Qt::QueuedConnection);
     connect(this, &MainWindow::requestClosePort, serialHandler, &SerialHandler::closePort, Qt::QueuedConnection);
 
+
+    dspPipeLineWindow = new DSPPipeLineWindow();
+    connect(serialHandler, &SerialHandler::newDataPacket, dspPipeLineWindow, &DSPPipeLineWindow::onNewData);
+
+
 }
 
 MainWindow::~MainWindow() {
@@ -99,19 +104,6 @@ void MainWindow::on_connectButton_clicked() {
     }
 }
 
-void MainWindow::on_addGraphButton_clicked() {
-
-    PlotterWindow* gw = new PlotterWindow();
-    gw->setAttribute(Qt::WA_DeleteOnClose);
-    plotList.append(gw);
-    gw->setGraphIndex(plotList.size());
-
-    connect(gw, &PlotterWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
-    connect(serialHandler, &SerialHandler::newDataPacket, gw, &PlotterWindow::onNewData);
-    gw->show();
-
-}
-
 void MainWindow::onGraphDestroyed(QObject* obj) {
 
     PlotterWindow* gw = static_cast<PlotterWindow*>(obj);
@@ -149,6 +141,19 @@ void MainWindow::closeEvent(QCloseEvent *event) {
     event->accept();
 }
 
+void MainWindow::on_addGraphButton_clicked() {
+
+    PlotterWindow* gw = new PlotterWindow();
+    gw->setAttribute(Qt::WA_DeleteOnClose);
+    plotList.append(gw);
+    gw->setGraphIndex(plotList.size());
+
+    connect(gw, &PlotterWindow::graphClosed, this, &MainWindow::onGraphDestroyed);
+    connect(serialHandler, &SerialHandler::newDataPacket, gw, &PlotterWindow::onNewData);
+    connect(dspPipeLineWindow, &DSPPipeLineWindow::newDSPOutput, gw, &PlotterWindow::onNewDSPData);
+    gw->show();
+}
+
 void MainWindow::on_addFFTGraph_clicked() {
 
     FFTPlotterWindow* gw = new FFTPlotterWindow();
@@ -160,7 +165,6 @@ void MainWindow::on_addFFTGraph_clicked() {
     connect(serialHandler, &SerialHandler::newDataPacket, gw, &FFTPlotterWindow::onNewData);
     gw->show();
 }
-
 
 void MainWindow::on_showTableView_clicked() {
 
@@ -174,12 +178,8 @@ void MainWindow::on_showTableView_clicked() {
     }
 }
 
-
 void MainWindow::on_DSPPipeLineWindow_clicked() {
 
-    if (dspPipeLineWindow == nullptr) {
-        dspPipeLineWindow = new DSPPipeLineWindow();
-        dspPipeLineWindow->show();
-    }
+    dspPipeLineWindow->show();
 }
 

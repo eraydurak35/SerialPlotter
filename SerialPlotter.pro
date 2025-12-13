@@ -10,8 +10,10 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    DSP/dspbase.cpp \
+    DSP/lowpassfilter.cpp \
+    DSP/medianfilter.cpp \
     datatablewindow.cpp \
-    dspbase.cpp \
     dsppipelinewindow.cpp \
     fftplotterwindow.cpp \
     fftworkermulti.cpp \
@@ -23,9 +25,11 @@ SOURCES += \
     serialhandler.cpp
 
 HEADERS += \
+    DSP/dspbase.h \
+    DSP/lowpassfilter.h \
+    DSP/medianfilter.h \
     datapacket.h \
     datatablewindow.h \
-    dspbase.h \
     dsppipelinewindow.h \
     fftplotterwindow.h \
     fftworkermulti.h \
