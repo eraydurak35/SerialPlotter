@@ -36,16 +36,26 @@
      </item>
      <item>
       <widget class="QPushButton" name="scanButton">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Scan</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="serialPorts"/>
+      <widget class="QComboBox" name="serialPorts">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QComboBox" name="baudRates">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <item>
         <property name="text">
          <string>921600</string>
@@ -90,6 +100,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="connectButton">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Connect</string>
        </property>
@@ -97,6 +110,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="addGraphButton">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Add Graph</string>
        </property>
@@ -104,6 +120,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="addFFTGraph">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Add FFT Graph</string>
        </property>
@@ -111,6 +130,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="showTableView">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>Table View</string>
        </property>
@@ -118,6 +140,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="DSPPipeLineWindow">
+       <property name="focusPolicy">
+        <enum>Qt::FocusPolicy::NoFocus</enum>
+       </property>
        <property name="text">
         <string>DSP Pipeline Editor</string>
        </property>

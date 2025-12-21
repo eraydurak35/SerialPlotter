@@ -31,6 +31,8 @@ private:
     void addDSPChannel(int channel);
     void removeChannel(int channel);
     void removeDSPChannel(int channel);
+    void updateTimeLabelPosition(const QPoint &mousePos);
+    QSize estimateLabelSize(QCPItemText *label);
 
     QMap<int, QCPGraph*> graphMap;
     QMap<int, QCPGraph*> dspGraphMap;
@@ -40,10 +42,17 @@ private:
     double yRange = 3.0;
     double yOffset = 0.0;
 
+    QCPItemLine   *timeLine = nullptr;
+    QCPItemText   *timeLabel = nullptr;
+
+    QCPItemText *pausedLabel = nullptr;
+
     QMap<int, QCheckBox*> channelCheckboxes;
     QMap<int, QCheckBox*> DSPChannelCheckboxes;
-
+    QMap<int, QCPItemTracer*> tracers;
+    QMap<int, QCPItemTracer*> DSPtracers;
     QMap<int, QColor> channelColors;
+    bool isGraphPaused = false;
 
 public slots:
     void onNewData(DataPacket packet);
@@ -56,6 +65,7 @@ private slots:
     void on_yoffsetspinbox_valueChanged(double arg1);
     void on_yrangespinbox_valueChanged(double arg1);
     void on_xrrangespinbox_valueChanged(double arg1);
+    void onPlotMouseMove(QMouseEvent *event);
 };
 
 #endif // PLOTTERWINDOW_H
