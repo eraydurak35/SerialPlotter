@@ -32,27 +32,60 @@ void DSPPipeLineWindow::createPipelines(int channelCount)
         ChannelPipeline pipe;
         pipe.channelIndex = ch;
 
+        pipe.latency_estimator.setWindowSize(256);
+        pipe.latency_estimator.setMaxLag(64);
+        pipe.latency_estimator.setDecimation(20);
+
         QWidget *container = new QWidget();
         QVBoxLayout *v = new QVBoxLayout(container);
+        v->setSpacing(4);
 
+        // ---- Pipeline başlığı ----
         pipe.label = new QLabel(QString("Ch %1").arg(ch));
         pipe.label->setAlignment(Qt::AlignCenter);
         pipe.label->setStyleSheet("font-weight: bold;");
         v->addWidget(pipe.label);
 
+        // ---- Pipeline list ----
         pipe.listWidget = new QListWidget();
         pipe.listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
         v->addWidget(pipe.listWidget);
 
+        // ---- Latency label'ları (YAN YANA) ----
+        QWidget *latencyWidget = new QWidget();
+        QHBoxLayout *latLay = new QHBoxLayout(latencyWidget);
+        latLay->setContentsMargins(0, 0, 0, 0);
+        latLay->setSpacing(6);
+
+        pipe.theoreticalLabel = new QLabel("T: 0.0 ms");
+        pipe.measuredLabel    = new QLabel("M: 0.0 ms");
+
+        pipe.theoreticalLabel->setToolTip("Theoretical (group delay)");
+        pipe.measuredLabel->setToolTip("Measured latency");
+
+        pipe.theoreticalLabel->setAlignment(Qt::AlignLeft);
+        pipe.measuredLabel->setAlignment(Qt::AlignRight);
+
+        pipe.theoreticalLabel->setStyleSheet("color: #BBBBBB;");
+        pipe.measuredLabel->setStyleSheet("color: #BBBBBB;");
+
+        latLay->addWidget(pipe.theoreticalLabel);
+        latLay->addStretch();
+        latLay->addWidget(pipe.measuredLabel);
+
+        v->addWidget(latencyWidget);
+
+        // ---- Add Process butonu ----
         pipe.addButton = new QPushButton("Add Process");
         v->addWidget(pipe.addButton);
 
+        // ---- Grid'e ekle ----
         int row = ch / cols;
         int col = ch % cols;
         ui->gridLayout_2->addWidget(container, row, col);
 
+        // ---- Pipeline'ı sakla ----
         pipelines.push_back(std::move(pipe));
-
         const int idx = static_cast<int>(pipelines.size()) - 1;
 
         setupPipelineUI(idx);
@@ -165,9 +198,9 @@ void DSPPipeLineWindow::rebuildPipelineIndices(ChannelPipeline &pipe) {
 }
 
 
-void DSPPipeLineWindow::onNewData(DataPacket packet) {
-
-    if ((packet.values.size()) > max_channel_count) {
+void DSPPipeLineWindow::onNewData(DataPacket packet)
+{
+    if (packet.values.size() > max_channel_count) {
         createPipelines(packet.values.size());
         max_channel_count = packet.values.size();
     }
@@ -176,13 +209,40 @@ void DSPPipeLineWindow::onNewData(DataPacket packet) {
 
     int n = qMin((int)pipelines.size(), packet.values.size());
 
-    for (int ch = 0; ch < n; ++ch) {
-        float x = packet.values[ch];
+    if (channelTotalLatencySec.size() != n)
+        channelTotalLatencySec = QVector<float>(n, 0.0f);
 
-        for (auto &blk : pipelines[ch].blocks)
+    for (int ch = 0; ch < n; ++ch) {
+
+        float x = packet.values[ch];
+        float latencySum = 0.0f;
+
+        for (auto &blk : pipelines[ch].blocks) {
+
+            // --- DSP işlemi ---
             x = blk->process(x, packet.data_frequency);
 
+            // --- GECİKME TOPLA ---
+            if (!blk->isBypassed())
+                latencySum += blk->latencySeconds(packet.data_frequency);
+        }
+
         out[ch] = x;
+
+
+        auto &est = pipelines[ch].latency_estimator;
+        est.setSampleRate(packet.data_frequency);
+
+        if (est.pushSample(packet.values[ch], x)) {
+            pipelines[ch].measuredLabel->setText(QString("M: %1 ms").arg(est.latencySeconds() * 1000.0f, 0, 'f', 1));
+        }
+        // else {
+        //      pipelines[ch].measuredLabel->setText("M: --");
+        // }
+
+        channelTotalLatencySec[ch] = latencySum;
+        pipelines[ch].theoreticalLabel->setText(QString("T: %1 ms").arg(channelTotalLatencySec[ch] * 1000.0f, 0, 'f', 1));
+
     }
 
     packet.values = out;

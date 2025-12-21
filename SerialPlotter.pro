@@ -15,6 +15,7 @@ SOURCES += \
     fftplotterwindow.cpp \
     fftworkermulti.cpp \
     kissfft-master/kiss_fft.c \
+    latencyestimator.cpp \
     main.cpp \
     mainwindow.cpp \
     plotterwindow.cpp \
@@ -33,6 +34,7 @@ HEADERS += \
     fftplotterwindow.h \
     fftworkermulti.h \
     kissfft-master/kiss_fft.h \
+    latencyestimator.h \
     mainwindow.h \
     plotterwindow.h \
     qcustomplot/qcustomplot.h \

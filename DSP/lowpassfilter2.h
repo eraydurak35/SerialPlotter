@@ -66,6 +66,11 @@ public:
         }
     }
 
+    float latencySeconds([[maybe_unused]]float fs) {
+        constexpr float Q = 0.70710678f;
+        return Q / (2.0f * M_PI * cutoffHz);
+    }
+
 
 private:
 

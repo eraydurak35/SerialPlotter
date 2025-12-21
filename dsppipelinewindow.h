@@ -7,15 +7,17 @@
 #include <QWidget>
 #include "DSP/dspbase.h"
 #include "qpushbutton.h"
+#include "latencyestimator.h"
 
 struct ChannelPipeline {
     int channelIndex;
-
     QLabel *label;
+    QLabel *theoreticalLabel;
+    QLabel *measuredLabel;
     QListWidget *listWidget;
     QPushButton *addButton;
-
     std::vector<std::unique_ptr<DSPBase>> blocks;
+    LatencyEstimator latency_estimator;
 };
 
 QT_BEGIN_NAMESPACE
@@ -45,6 +47,8 @@ private:
     std::vector<std::unique_ptr<DSPBase>> pipeline;
     std::vector<ChannelPipeline> pipelines;
     int max_channel_count = 0;
+    QVector<float> channelTotalLatencySec;
+
 
     void rebuildPipelineItemIndices();
     void setupPipelineUI(int pipeIndex);

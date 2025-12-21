@@ -76,6 +76,11 @@ public:
         }
     }
 
+    float latencySeconds([[maybe_unused]]float fs) {
+        return 1.0f / (2.0f * M_PI * centerHz);
+    }
+
+
 private:
     // Kullanıcı parametreleri
     float centerHz   = 50.0f;   // merkez frekans

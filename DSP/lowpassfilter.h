@@ -13,7 +13,7 @@ public:
 
     LowPassFilter() {}
 
-    float process(float in, float fs) override {
+    float process(float in, float fs) {
         if (bypass)
             return in;
 
@@ -22,7 +22,7 @@ public:
         return state;
     }
 
-    void showConfigDialog(QWidget *parent) override {
+    void showConfigDialog(QWidget *parent) {
 
         QDialog dlg(parent);
         dlg.setWindowTitle("LowPass Filter");
@@ -43,6 +43,11 @@ public:
         if (dlg.exec() == QDialog::Accepted)
             cutoffHz = cut->value();
     }
+
+    float latencySeconds([[maybe_unused]]float fs) {
+        return 1.0f / (2.0f * M_PI * cutoffHz);
+    }
+
 private:
 
     static float computeAlpha(float fc, float fs) {

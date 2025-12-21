@@ -17,8 +17,7 @@ public:
         enforceOddWindow();
     };
 
-    float process(float in, [[maybe_unused]]float fs)
-    {
+    float process(float in, [[maybe_unused]]float fs) {
         if (bypass)
             return in;
 
@@ -42,8 +41,7 @@ public:
         return tmp[tmp.size() / 2];
     }
 
-    void showConfigDialog(QWidget *parent)
-    {
+    void showConfigDialog(QWidget *parent) {
         QDialog dlg(parent);
         dlg.setWindowTitle("Median Filter");
 
@@ -68,6 +66,10 @@ public:
             enforceOddWindow();
             buffer.clear();  // state reset (çok önemli)
         }
+    }
+
+    float latencySeconds(float fs) {
+        return 0.5f * (windowSize - 1) / fs;
     }
 
 private:
