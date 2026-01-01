@@ -7,6 +7,7 @@
 #include "datatablewindow.h"
 #include "serialhandler.h"
 #include "dsppipelinewindow.h"
+#include "logger.h"
 #include <QTimer>
 #include <QThread>
 
@@ -33,6 +34,7 @@ private:
     QList<FFTPlotterWindow*> fftList;
     DataTableWindow *tableWindow = nullptr;
     DSPPipeLineWindow *dspPipeLineWindow = nullptr;
+    Logger *logger = nullptr;
 
     SerialHandler *serialHandler = nullptr;
     QThread *serialThread = nullptr;
@@ -56,6 +58,8 @@ private slots:
     void onSerialDisconnected();
 
     void on_DSPPipeLineWindow_clicked();
+
+    void on_openLogger_clicked();
 
 signals:
     void requestOpenPort(QString portName, int baudrate);

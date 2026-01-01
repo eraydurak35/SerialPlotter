@@ -20,7 +20,7 @@
       <x>70</x>
       <y>10</y>
       <width>122</width>
-      <height>258</height>
+      <height>288</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -145,6 +145,13 @@
        </property>
        <property name="text">
         <string>DSP Pipeline Editor</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="openLogger">
+       <property name="text">
+        <string>Open Logger</string>
        </property>
       </widget>
      </item>

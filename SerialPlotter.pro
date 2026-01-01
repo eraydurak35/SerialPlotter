@@ -16,6 +16,7 @@ SOURCES += \
     fftworkermulti.cpp \
     kissfft-master/kiss_fft.c \
     latencyestimator.cpp \
+    logger.cpp \
     main.cpp \
     mainwindow.cpp \
     plotterwindow.cpp \
@@ -35,6 +36,7 @@ HEADERS += \
     fftworkermulti.h \
     kissfft-master/kiss_fft.h \
     latencyestimator.h \
+    logger.h \
     mainwindow.h \
     plotterwindow.h \
     qcustomplot/qcustomplot.h \
@@ -44,6 +46,7 @@ FORMS += \
     datatablewindow.ui \
     dsppipelinewindow.ui \
     fftplotterwindow.ui \
+    logger.ui \
     mainwindow.ui \
     plotterwindow.ui
 

@@ -184,3 +184,14 @@ void MainWindow::on_DSPPipeLineWindow_clicked() {
     dspPipeLineWindow->show();
 }
 
+
+void MainWindow::on_openLogger_clicked() {
+
+    if (logger == nullptr) {
+        logger = new Logger();
+
+        connect(serialHandler, &SerialHandler::newDataPacket, logger, &Logger::logData);
+    }
+    logger->show();
+}
+
