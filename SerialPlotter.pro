@@ -10,6 +10,9 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    allancalculator.cpp \
+    allanvariance.cpp \
+    allanwindow.cpp \
     datatablewindow.cpp \
     dsppipelinewindow.cpp \
     fftplotterwindow.cpp \
@@ -29,6 +32,9 @@ HEADERS += \
     DSP/lowpassfilter2.h \
     DSP/medianfilter.h \
     DSP/notchfilter.h \
+    allancalculator.h \
+    allanvariance.h \
+    allanwindow.h \
     datapacket.h \
     datatablewindow.h \
     dsppipelinewindow.h \
@@ -43,6 +49,8 @@ HEADERS += \
     serialhandler.h
 
 FORMS += \
+    allanvariance.ui \
+    allanwindow.ui \
     datatablewindow.ui \
     dsppipelinewindow.ui \
     fftplotterwindow.ui \

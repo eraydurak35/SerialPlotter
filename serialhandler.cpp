@@ -159,7 +159,7 @@ void SerialHandler::onReadyRead()
             is_initialized = true;
         }
 
-        if (i++ >= 200) {
+        if (i++ >= 199) {
             i = 0;
             float time_diff = static_cast<float>(packet.timestamp) - static_cast<float>(window_start_timestamp);
             window_start_timestamp = packet.timestamp;

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>251</width>
-    <height>348</height>
+    <height>378</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,7 +20,7 @@
       <x>70</x>
       <y>10</y>
       <width>122</width>
-      <height>288</height>
+      <height>318</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -152,6 +152,13 @@
       <widget class="QPushButton" name="openLogger">
        <property name="text">
         <string>Open Logger</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="allanVarianceButton">
+       <property name="text">
+        <string>Allan Variance</string>
        </property>
       </widget>
      </item>

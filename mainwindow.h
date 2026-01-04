@@ -7,6 +7,7 @@
 #include "datatablewindow.h"
 #include "serialhandler.h"
 #include "dsppipelinewindow.h"
+#include "allanvariance.h"
 #include "logger.h"
 #include <QTimer>
 #include <QThread>
@@ -35,6 +36,7 @@ private:
     DataTableWindow *tableWindow = nullptr;
     DSPPipeLineWindow *dspPipeLineWindow = nullptr;
     Logger *logger = nullptr;
+    AllanVariance *allanVariance = nullptr;
 
     SerialHandler *serialHandler = nullptr;
     QThread *serialThread = nullptr;
@@ -60,6 +62,8 @@ private slots:
     void on_DSPPipeLineWindow_clicked();
 
     void on_openLogger_clicked();
+
+    void on_allanVarianceButton_clicked();
 
 signals:
     void requestOpenPort(QString portName, int baudrate);

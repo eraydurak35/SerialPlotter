@@ -113,7 +113,7 @@ void Logger::logData(DataPacket packet)
     if (!headerWritten) {
         channelCount = packet.values.size();
 
-        stream << "timestamp,data_frequency";
+        stream << "timestamp_ms";
 
         for (int i = 0; i < channelCount; ++i)
             stream << ",ch" << (i + 1);
@@ -124,10 +124,9 @@ void Logger::logData(DataPacket packet)
 
     // --- DATA ROW ---
     stream << packet.timestamp;
-    stream << "," << QString::number(packet.data_frequency, 'f', 0);
 
     for (float v : packet.values) {
-        stream << "," << QString::number(v, 'f', 3);
+        stream << "," << QString::number(v, 'f', 4);
     }
     stream << "\n";
 

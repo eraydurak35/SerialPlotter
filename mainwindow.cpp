@@ -184,7 +184,6 @@ void MainWindow::on_DSPPipeLineWindow_clicked() {
     dspPipeLineWindow->show();
 }
 
-
 void MainWindow::on_openLogger_clicked() {
 
     if (logger == nullptr) {
@@ -193,5 +192,13 @@ void MainWindow::on_openLogger_clicked() {
         connect(serialHandler, &SerialHandler::newDataPacket, logger, &Logger::logData);
     }
     logger->show();
+}
+
+void MainWindow::on_allanVarianceButton_clicked() {
+
+    if (allanVariance == nullptr) {
+        allanVariance = new AllanVariance();
+    }
+    allanVariance->show();
 }
 
