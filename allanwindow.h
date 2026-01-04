@@ -2,6 +2,7 @@
 #define ALLANWINDOW_H
 
 #include <QWidget>
+#include "allancalculator.h"
 
 namespace Ui {
 class AllanWindow;
@@ -15,10 +16,12 @@ public:
     explicit AllanWindow(QWidget *parent = nullptr);
     ~AllanWindow();
 
-    void AllanPlotWindow(const QVector<double>& tau, const QVector<double>& allanDev);
+    void AllanPlotWindow(const AllanCalculator::Result results);
 
 private:
     Ui::AllanWindow *ui;
+
+    QMap<int, QColor> channelColors;
 };
 
 #endif // ALLANWINDOW_H

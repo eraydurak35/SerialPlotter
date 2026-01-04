@@ -9,30 +9,40 @@ class AllanCalculator : public QObject
     Q_OBJECT
 
 public:
-    struct Result
+    struct ChannelResult
     {
         QVector<double> tau;
         QVector<double> allanDev;
+
+        double arw = 0.0;
+        double tauArw = 0.0;
+
+        double bias = 0.0;
+        double tauBias = 0.0;
+    };
+
+    struct Result
+    {
+        QVector<ChannelResult> channels;
     };
 
     explicit AllanCalculator(QObject *parent = nullptr);
-    double computeARW(const QVector<double>& tau, const QVector<double>& adev);
+    double computeARW(const QVector<double>& tau, const QVector<double>& adev, double& tauArw);
     // gyro → °/√s veya rad/√s
     // accel → m/s²/√Hz
 
     double computeBiasInstability(const QVector<double>& tau, const QVector<double>& adev, double& tauBias);
 
-public slots:
-    void process(const QString& csvPath, int channelIndex);
+    void process(const QString& csvPath);
 
 signals:
-    void progress(int percent);
-    void finished(const AllanCalculator::Result& result);
-    void error(const QString& msg);
+    void progress(int);
+    void finished(const Result&);
+    void error(const QString&);
 
 private:
     bool loadCsv(const QString& filePath, int channelIndex);
-    Result compute();
+    ChannelResult compute();
 
     QVector<double> m_time;
     QVector<double> m_data;

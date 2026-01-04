@@ -58,21 +58,17 @@ void AllanVariance::onComputeButtonClicked() {
     calc->moveToThread(thread);
 
     connect(thread, &QThread::started, [=]() {
-        calc->process(m_csvPath, 5); // ui->channelComboBox->currentIndex() index daha sonra verilecek
+        calc->process(m_csvPath);
     });
 
     connect(calc, &AllanCalculator::progress,
             ui->ProgressBar, &QSlider::setValue);
 
     connect(calc, &AllanCalculator::finished,
-            this, [=](const AllanCalculator::Result& r) {
+            this, [=](const AllanCalculator::Result& r)
+            {
                 m_result = r;
                 QMessageBox::information(this, "Tamam", "Hesaplama bitti");
-
-                qDebug() << "ARW: " << calc->computeARW(m_result.tau, m_result.allanDev);
-                double tau = 0;
-                qDebug() << "Bias Instability: " << 3600.0 * calc->computeBiasInstability(m_result.tau, m_result.allanDev, tau);
-                qDebug() << "Min IDX: " << tau;
                 thread->quit();
             });
 
@@ -90,14 +86,14 @@ void AllanVariance::onComputeButtonClicked() {
 
 void AllanVariance::onPlotResultsClicked() {
 
-    if (m_result.tau.isEmpty())
+    if (m_result.channels[0].tau.isEmpty())
     {
         QMessageBox::warning(this, "Hata", "Once hesaplama yapin");
         return;
     }
 
     AllanWindow *plotWin = new AllanWindow();
-    plotWin->AllanPlotWindow(m_result.tau, m_result.allanDev);
+    plotWin->AllanPlotWindow(m_result);
 
     plotWin->setAttribute(Qt::WA_DeleteOnClose); // memory leak yok
     plotWin->show();

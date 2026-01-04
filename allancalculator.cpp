@@ -58,10 +58,9 @@ bool AllanCalculator::loadCsv(const QString& filePath, int channelIndex)
 }
 
 
-AllanCalculator::Result AllanCalculator::compute()
+AllanCalculator::ChannelResult AllanCalculator::compute()
 {
-    Result r;
-    qsizetype step = 0;
+    ChannelResult r;
 
     const qsizetype N = m_data.size();
     if (N < 20 || m_Ts <= 0.0)
@@ -69,19 +68,23 @@ AllanCalculator::Result AllanCalculator::compute()
 
     /* ---------- Prefix Sum ---------- */
     QVector<double> prefix(N + 1, 0.0);
-    for (qsizetype i = 0; i < N; ++i) {
-
+    for (qsizetype i = 0; i < N; ++i)
         prefix[i + 1] = prefix[i] + m_data[i];
 
-        emit progress(static_cast<int>(100.0 * (++step) / N));
-    }
-    /* ---------- Tau setup ---------- */
+    /* ---------- Allan computation ---------- */
+    double m = 1.0;
 
-
-    for (qsizetype m = 1; m <= N / 2; m *= 2)
+    while (true)
     {
-        const double tau = m * m_Ts;
-        const qsizetype M = N - 2 * m + 1;
+        qsizetype mi = static_cast<qsizetype>(qRound(m));
+        if (mi < 1)
+            mi = 1;
+
+        if (mi > N / 2)
+            break;
+
+        const double tau = mi * m_Ts;
+        const qsizetype M = N - 2 * mi + 1;
         if (M <= 0)
             break;
 
@@ -90,10 +93,10 @@ AllanCalculator::Result AllanCalculator::compute()
         for (qsizetype k = 0; k < M; ++k)
         {
             const double a1 =
-                (prefix[k + m] - prefix[k]) / m;
+                (prefix[k + mi] - prefix[k]) / mi;
 
             const double a2 =
-                (prefix[k + 2 * m] - prefix[k + m]) / m;
+                (prefix[k + 2 * mi] - prefix[k + mi]) / mi;
 
             const double d = a2 - a1;
             sum += d * d;
@@ -102,56 +105,109 @@ AllanCalculator::Result AllanCalculator::compute()
         r.tau.append(tau);
         r.allanDev.append(qSqrt(sum / (2.0 * M)));
 
+        m *= std::sqrt(2.0);
     }
 
-    emit progress(100);
     return r;
+
 }
 
-void AllanCalculator::process(const QString& csvPath, int channelIndex)
+void AllanCalculator::process(const QString& csvPath)
 {
-    if (!loadCsv(csvPath, channelIndex))
+    QFile file(csvPath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        emit error("CSV okunamadi");
+        emit error("Dosya acilamadi");
         return;
     }
 
-    Result r = compute();
-    emit finished(r);
-}
+    QTextStream in(&file);
 
+    QString header = in.readLine();
+    QStringList cols = header.split(',');
+
+    const int channelCount = cols.size() - 1; // timestamp hariç
+    QVector<QVector<double>> data(channelCount);
+
+    QVector<double> timestamps;
+
+    while (!in.atEnd())
+    {
+        QString line = in.readLine();
+        if (line.isEmpty())
+            continue;
+
+        QStringList parts = line.split(',');
+        if (parts.size() < cols.size())
+            continue;
+
+        timestamps.append(parts[0].toDouble());
+
+        for (int i = 0; i < channelCount; ++i)
+            data[i].append(parts[i + 1].toDouble());
+    }
+
+    file.close();
+
+    double Ts = (timestamps[1] - timestamps[0]) * 1e-3;
+
+    Result result;
+    result.channels.resize(channelCount);
+
+    for (int ch = 0; ch < channelCount; ++ch)
+    {
+        m_data = data[ch];
+        m_Ts = Ts;
+
+        result.channels[ch] = compute();
+        double tau_bias_instability = 0;
+        double tau_awr = 0;
+        result.channels[ch].arw = 60.0 * computeARW(result.channels[ch].tau, result.channels[ch].allanDev, tau_awr);
+        result.channels[ch].bias = 3600.0 * computeBiasInstability(result.channels[ch].tau, result.channels[ch].allanDev, tau_bias_instability);
+        result.channels[ch].tauBias = tau_bias_instability;
+        result.channels[ch].tauArw = tau_awr;
+
+        emit progress(100 * (ch + 1) / channelCount);
+    }
+
+    emit finished(result);
+}
 
 double AllanCalculator::computeARW(
     const QVector<double>& tau,
-    const QVector<double>& adev)
+    const QVector<double>& adev,
+    double& tauArw)
 {
     QVector<double> arwCandidates;
+    QVector<double> tauCandidates;
 
     for (int i = 1; i < tau.size(); ++i)
     {
         double slope =
-            qLn(adev[i]) - qLn(adev[i - 1]);
-        slope /= (qLn(tau[i]) - qLn(tau[i - 1]));
+            (qLn(adev[i]) - qLn(adev[i - 1])) /
+            (qLn(tau[i]) - qLn(tau[i - 1]));
 
-        // -0.5 eğimine yakın mı?
         if (qAbs(slope + 0.5) < 0.1)
         {
-            double arw = adev[i] * qSqrt(tau[i]);
-            arwCandidates.append(arw);
+            arwCandidates.append(adev[i] * qSqrt(tau[i]));
+            tauCandidates.append(tau[i]);
         }
     }
 
     if (arwCandidates.isEmpty())
+    {
+        tauArw = 0.0;
         return 0.0;
+    }
 
     // Ortalama
     double sum = 0.0;
     for (double v : arwCandidates)
         sum += v;
 
+    tauArw = tauCandidates[tauCandidates.size() / 2]; // temsilci τ
     return sum / arwCandidates.size();
 }
-
 
 double AllanCalculator::computeBiasInstability(
     const QVector<double>& tau,
